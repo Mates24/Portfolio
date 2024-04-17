@@ -9,6 +9,7 @@
 
 body{
     background: #081b29;
+    color: #ededed;
 }
 
 .header{
@@ -21,6 +22,7 @@ body{
     width: 100%;
     padding: 20px 10%;
     background: transparent;
+    z-index: 100;
 }
 .header ul{
     list-style: none;
@@ -46,4 +48,56 @@ body{
 }
 .navbar ul li a:hover{
     color: #3f73ec;
+}
+
+.home{
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    padding: 0 10%;
+}
+.home-content{
+    max-width: 600px;
+}
+.home-content h1{
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.home-content h3{
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #3f73ec;
+    margin-bottom: 8px;
+}
+.home-content p{
+    margin-bottom: 25px;
+}
+.home a{
+    position: relative;
+    font-weight: 500;
+    color: #3f73ec;
+    text-decoration: none;
+    letter-spacing: 1px;
+    padding: 8px 20px;
+    border-radius: 7px;
+    border: 3px solid #3f73ec;
+    overflow: hidden;
+}
+.home a::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #3f73ec;
+    z-index: -1;
+    transition: .5s;
+}
+.home a:hover{
+    color: #081b29;
+}
+.home a:hover::before{
+    width: 100%;
 }
