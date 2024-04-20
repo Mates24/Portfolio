@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 :root{
+    --bg-color: #081b29;
+    --font-color: #ededed;
+    --primary-color: #3f73ec;
     --typewriterCharacters: 19;
     --typewriterSpeed: 2s;
 }
@@ -13,8 +16,8 @@
 }
 
 body{
-    background: #081b29;
-    color: #ededed;
+    background: var(--bg-color);
+    color: var(--font-color);
 }
 
 .header{
@@ -34,13 +37,13 @@ body{
 }
 .header a{
     text-decoration: none;
-    color: #ededed;
+    color: var(--font-color);
 }
 
 .logo{
     font-size: 25px;
     font-weight: 600;
-    color: #ededed;
+    color: var(--font-color);
 }
 
 .navbar ul{
@@ -52,7 +55,7 @@ body{
     transition: .3s;
 }
 .navbar ul li a:hover{
-    color: #3f73ec;
+    color: var(--primary-color);
 }
 
 .home{
@@ -81,13 +84,13 @@ body{
     height: 100%;
 }
 .home-content h1::before{
-    background: #081b29;
+    background: var(--bg-color);
     animation: 
         typewriter var(--typewriterSpeed) steps(var(--typewriterCharacters)) .5s forwards;
 }
 .home-content h1::after{
     width: .05em;
-    background: #3f73ec;
+    background: var(--primary-color);
     animation: 
         typewriter var(--typewriterSpeed) steps(var(--typewriterCharacters)) .5s forwards,
         blink 750ms steps(var(--typewriterCharacters)) infinite;
@@ -95,7 +98,7 @@ body{
 .home-content h3{
     font-size: 1.7rem;
     font-weight: 700;
-    color: #3f73ec;
+    color: var(--primary-color);
     margin-bottom: 8px;
 }
 .home-content p{
@@ -104,12 +107,12 @@ body{
 .home a.hire-btn{
     position: relative;
     font-weight: 500;
-    color: #3f73ec;
+    color: var(--primary-color);
     text-decoration: none;
     letter-spacing: 1px;
     padding: 8px 20px;
     border-radius: 7px;
-    border: 3px solid #3f73ec;
+    border: 3px solid var(--primary-color);
     overflow: hidden;
 }
 .home a.hire-btn::before{
@@ -119,12 +122,12 @@ body{
     left: 0;
     width: 0;
     height: 100%;
-    background: #3f73ec;
+    background: var(--primary-color);
     z-index: -1;
     transition: .5s;
 }
 .home a.hire-btn:hover{
-    color: #081b29;
+    color: var(--bg-color);
 }
 .home a.hire-btn:hover::before{
     width: 100%;
@@ -141,12 +144,12 @@ body{
     justify-content: center;
     align-items: center;
     font-size: 25px;
-    color: #3f73ec;
+    color: var(--primary-color);
     text-decoration: none;
     width: 40px;
     height: 40px;
     background: transparent;
-    border: 3px solid #3f73ec;
+    border: 3px solid var(--primary-color);
     border-radius: 50%;
     overflow: hidden;
 }
@@ -157,12 +160,12 @@ body{
     left: 0;
     width: 0;
     height: 100%;
-    background: #3f73ec;
+    background: var(--primary-color);
     z-index: -1;
     transition: .5s;
 }
 .home-sci a:hover{
-    color: #081b29;
+    color: var(--bg-color);
 }
 .home-sci a:hover::before{
     width: 100%;
