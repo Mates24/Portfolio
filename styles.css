@@ -204,6 +204,12 @@ body{
 .heading span{
     color: var(--primary-color);
 }
+.about-img{
+    height: 300px;
+    width: 400px;
+    border-left: 3px solid var(--primary-color);
+    border-right: 3px solid var(--primary-color);
+}
 .about-content{
     max-width: 600px;
 }
