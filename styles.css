@@ -58,7 +58,7 @@ body{
     color: var(--primary-color);
 }
 
-.home{
+#home{
     display: flex;
     align-items: center;
     height: 100vh;
@@ -104,7 +104,7 @@ body{
 .home-content p{
     margin-bottom: 10px;
 }
-.home a.hire-btn{
+#home a.hire-btn{
     position: relative;
     font-weight: 500;
     color: var(--primary-color);
@@ -115,7 +115,7 @@ body{
     border: 3px solid var(--primary-color);
     overflow: hidden;
 }
-.home a.hire-btn::before{
+#home a.hire-btn::before{
     content: '';
     position: absolute;
     top: 0;
@@ -126,10 +126,10 @@ body{
     z-index: -1;
     transition: .5s;
 }
-.home a.hire-btn:hover{
+#home a.hire-btn:hover{
     color: var(--bg-color);
 }
-.home a.hire-btn:hover::before{
+#home a.hire-btn:hover::before{
     width: 100%;
 }
 .home-sci{
