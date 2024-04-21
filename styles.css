@@ -205,6 +205,71 @@ body{
     color: var(--primary-color);
 }
 
+/* Education section */
+.education{
+    display: grid;
+    grid-template-areas: 
+        'heading heading'
+        'timeline schools';
+    grid-template-columns: .6fr 1fr;
+    align-items: center;
+    justify-content: center;
+    column-gap: 70px;
+    row-gap: 50px;
+    padding: 100px;
+    height: 100vh;
+}
+.education .heading{
+    grid-area: heading;
+    text-align: center;
+}
+.education .timeline{
+    grid-area: timeline;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    height: 100%;
+    gap: calc(50% - 2.1rem);
+    font-size: 3rem;
+}
+.education .timeline::after{
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 1.5rem;
+    width: 1.6px;
+    height: 100%;
+    background: var(--primary-color);
+    z-index: -1;
+}
+.timeline i{
+    color: rgb(220, 220, 123);
+    background: var(--bg-primary-color);
+}
+.education .schools-wrapper{
+    grid-area: schools;
+    max-width: 600px;
+}
+.education .schools-wrapper div{
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 2px solid var(--primary-color);
+    border-top: 2px solid var(--primary-color);
+    /* background: #143b56; */
+}
+.education .schools-wrapper div:first-child{
+    margin-bottom: 2rem;
+}
+.education .schools-wrapper div h3{
+    color: rgb(220, 220, 123);
+
+    font-size: 1.3rem;
+}
+.education .schools-wrapper div p:first-of-type{
+    margin-block: 0 .5rem;
+}
+
 /* Animations for typewriter in Home section */
 @keyframes typewriter{
     to{
