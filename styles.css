@@ -2,10 +2,9 @@
 
 :root{
     --bg-primary-color: #081b29;
-    --bg-secondary-color: #151F27;
-    --bg-tertiary-color: #091D1C;
-    --bg-fortiary-color: #182833;
-    --font-color: #ededed;
+    --bg-secondary-color: #0C2228;
+    --font-primary-color: #ededed;
+    --font-secondary-color: #D4AE5D;
     --primary-color: #3f73ec;
     --typewriterCharacters: 19;
     --typewriterSpeed: 2s;
@@ -20,7 +19,7 @@
 
 body{
     background: var(--bg-primary-color);
-    color: var(--font-color);
+    color: var(--font-primary-color);
 }
 
 /* Navbar */
@@ -42,13 +41,13 @@ body{
 }
 .header a{
     text-decoration: none;
-    color: var(--font-color);
+    color: var(--font-primary-color);
 }
 
 .header .logo{
     font-size: 25px;
     font-weight: 600;
-    color: var(--font-color);
+    color: var(--font-primary-color);
 }
 
 .navbar ul{
@@ -183,7 +182,7 @@ body{
     justify-content: space-evenly;
     align-items: center;
     height: 100vh;
-    background: var(--bg-fortiary-color);
+    background: var(--bg-secondary-color);
 }
 .heading{
     font-size: 2.6rem;}
@@ -260,7 +259,7 @@ body{
     z-index: -1;
 }
 .timeline i{
-    color: rgb(220, 220, 123);
+    color: var(--font-secondary-color);
     background: var(--bg-primary-color);
 }
 .education .schools-wrapper{
@@ -277,7 +276,7 @@ body{
     margin-bottom: 2rem;
 }
 .education .schools-wrapper div h3{
-    color: rgb(220, 220, 123);
+    color: var(--font-secondary-color);
 
     font-size: 1.3rem;
 }
