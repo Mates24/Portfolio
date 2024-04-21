@@ -211,7 +211,7 @@ body{
     grid-template-areas: 
         'heading heading'
         'timeline schools';
-    grid-template-columns: .6fr 1fr;
+    grid-template-columns: .55fr 1fr;
     align-items: center;
     justify-content: center;
     column-gap: 70px;
@@ -252,11 +252,10 @@ body{
     max-width: 600px;
 }
 .education .schools-wrapper div{
-    padding: 20px;
+    padding: 20px 25px;
     border-radius: 10px;
     border-left: 2px solid var(--primary-color);
     border-top: 2px solid var(--primary-color);
-    /* background: #143b56; */
 }
 .education .schools-wrapper div:first-child{
     margin-bottom: 2rem;
