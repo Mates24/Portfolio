@@ -10,6 +10,10 @@
     --typewriterSpeed: 2s;
 }
 
+html{
+    scroll-behavior: smooth;
+}
+
 *{
     font-family: 'Poppins', sans-serif;
     margin: 0;
