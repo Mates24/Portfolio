@@ -40,9 +40,6 @@ body{
     backdrop-filter: blur(25px);
     z-index: 100;
 }
-.header ul{
-    list-style: none;
-}
 .header a{
     text-decoration: none;
     color: var(--font-primary-color);
@@ -56,6 +53,7 @@ body{
 
 .navbar ul{
     display: flex;
+    list-style: none;
     gap: 35px;
 }
 .navbar ul li a{
