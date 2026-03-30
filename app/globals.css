@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-void:        #03060f;
+  --color-abyss:       #060d1f;
+  --color-deep:        #0a1628;
+  --color-surface:     #0d1f3c;
+  --color-surface-2:   #112348;
+  --color-signal:      #38bdf8;
+  --color-pulse:       #67e8f9;
+  --color-arc:         #818cf8;
+  --color-text-primary:   #e2eaf4;
+  --color-text-secondary: #7a9bbf;
+  --color-text-muted:     #3d5a7a;
+}
+
+:root {
+  --border-subtle:      rgba(99, 179, 237, 0.08);
+  --border-bright:      rgba(99, 179, 237, 0.18);
+  --glow-color:         rgba(56, 189, 248, 0.15);
+  --glow-strong:        rgba(56, 189, 248, 0.30);
+  --spacing-section:    8rem;
+  --ease-smooth:        cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:        cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--color-void);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(56, 189, 248, 0.25);
+  color: var(--color-pulse);
+}
+
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: var(--color-abyss); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-signal);
+  border-radius: 9999px;
+}
+
+.bg-grid-overlay {
+  background-image:
+    linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #38bdf8 0%, #67e8f9 50%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-signal {
+  box-shadow:
+    0 0 20px rgba(56, 189, 248, 0.15),
+    0 0 60px rgba(56, 189, 248, 0.05);
+}
+
+.glow-text {
+  text-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+}
+
+.section-padding {
+  padding-top: var(--spacing-section);
+  padding-bottom: var(--spacing-section);
+}
+
+.container-wide {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container-wide {
+    padding-inline: 3rem;
+  }
+}
