@@ -1,17 +1,13 @@
 'use client'
 import { useRef } from 'react'
 import Link from 'next/link'
-import {
-  motion,
-  useScroll,
-  useTransform,
-} from 'framer-motion'
+import { motion, useScroll, useTransform, } from 'framer-motion'
 
-// ── Easing curves ────────────────────────────────────────────────
+// Easing curves
 const EASE_SPRING  = [0.16, 1, 0.3, 1]    as [number, number, number, number]
 const EASE_SMOOTH  = [0.4, 0, 0.2, 1]     as [number, number, number, number]
 
-// ── Animation variants ───────────────────────────────────────────
+// Animation variants
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   show:   {
@@ -35,11 +31,11 @@ const staggerContainer = (staggerChildren: number, delayChildren = 0) => ({
   show:   { transition: { staggerChildren, delayChildren } },
 })
 
-// ── Headline words ───────────────────────────────────────────────
+// Headline words
 const LINE_1 = ['Crafting', 'digital', 'things']
 const LINE_2 = ['beyond', 'ordinary']
 
-// ── Ambient orbs ─────────────────────────────────────────────────
+// Ambient orbs
 const ORBS = [
   {
     className: 'w-[700px] h-[500px] -top-32 left-1/2 -translate-x-1/2',
@@ -92,12 +88,6 @@ export default function Hero() {
           }}
         />
       ))}
-
-      {/* ── Horizontal atmospheric line ── */}
-      <div className="
-        absolute top-1/2 left-0 right-0 h-px pointer-events-none
-        bg-gradient-to-r from-transparent via-[rgba(56,189,248,0.12)] to-transparent
-      " />
 
       {/* ── Main content ── */}
       <motion.div
