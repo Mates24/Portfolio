@@ -60,7 +60,7 @@ export const metadata: Metadata = {
       'Software Engineer and Designer crafting precise, intentional digital experiences. Based in Liptovský Mikuláš, open to remote work.',
     images: [
       {
-        url: '/og-image.png', // 1200×630 — create this!
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Mathias Matejčík — Engineer & Designer',
