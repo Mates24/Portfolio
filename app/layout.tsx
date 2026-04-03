@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import './globals.css'
 
 const syne = Syne({
@@ -105,6 +106,7 @@ export default function RootLayout({
       <body className="bg-grid-overlay antialiased">
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
