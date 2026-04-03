@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google'
+import { Analytics } from "@vercel/analytics/next"
 import './globals.css'
 
 const syne = Syne({
@@ -23,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
   preload: false,
 })
 
-const BASE_URL = 'https://mathiasmatejcik.com' // ← update domain
+const BASE_URL = 'https://portfolio-eight-brown-77.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -103,6 +104,7 @@ export default function RootLayout({
     <html lang="en" className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
       <body className="bg-grid-overlay antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   )
