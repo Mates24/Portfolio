@@ -1,13 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const NAV_LINKS = [
   { label: 'About',      href: '#about'      },
   { label: 'Skills',     href: '#skills'      },
   { label: 'Projects',   href: '#projects'    },
-  { label: 'Experience', href: '#experience'  },
+  { label: 'Contact',    href: '#contact'    },
 ]
 
 export default function Navbar() {
@@ -68,19 +69,16 @@ export default function Navbar() {
         >
 
           {/* ── Logo ── */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="
-              w-7 h-7 rounded-[8px] flex items-center justify-center
-              bg-gradient-to-br from-[#38bdf8] to-[#818cf8]
-              shadow-[0_0_16px_rgba(56,189,248,0.4)]
-              group-hover:shadow-[0_0_24px_rgba(56,189,248,0.6)]
-              transition-shadow duration-300
-              font-display font-bold text-[13px] text-white tracking-tight
-            ">
-              YN
-            </div>
+          <Link href="/" className="flex items-center gap-1.5 group">
+            <Image 
+              src="/logo.svg"
+              alt="Logo"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
             <span className="font-display font-semibold text-[15px] text-[#e2eaf4] tracking-tight">
-              Your Name
+              Mathias
             </span>
           </Link>
 
