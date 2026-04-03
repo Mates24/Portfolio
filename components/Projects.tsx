@@ -38,7 +38,7 @@ const PROJECTS: Project[] = [
     title:    'Krovmat - Roofing company website',
     desc:     'Modern, responsive website for a local roofing company. Clean design, fast performance, and clear CTAs to drive conversions.',
     tags:     ['HTML', 'CSS', 'JavaScript', 'PHP', 'Framer Motion'],
-    href:     'https://krovmat.sk',
+    href:     'https://krovmat.eu',
     image:    '/projects/krovmat.png',
     featured: false,
     accent:   'rgba(129,140,248,0.15)',
