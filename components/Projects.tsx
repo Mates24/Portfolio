@@ -63,6 +63,16 @@ const PROJECTS: Project[] = [
     featured: false,
     accent:   'rgba(56,189,248,0.12)',
   },
+  {
+    number:   '05',
+    title:    'Sadrokartóny Dunaj Martin - website',
+    desc:     'Modern, responsive website for a drywall installation company. Clean layout, fast loading, and clear call-to-actions focused on generating leads and customer inquiries.',
+    tags:     ['HTML', 'CSS', 'JavaScript', 'PHP'],
+    href:     'https://sadrokartonydunaj.sk',
+    image:    '/projects/sadrokartonydunaj.png',
+    featured: false,
+    accent:   'rgba(56,189,248,0.12)',
+  },
 ]
 
 // Arrow icon
