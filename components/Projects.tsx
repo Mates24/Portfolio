@@ -55,12 +55,12 @@ const PROJECTS: Project[] = [
   },
   {
     number:   '04',
-    title:    'LogBook - App for sailors',
-    desc:     'Designed and developed LogBook, a mobile app for sailors to track their voyages, log weather conditions, and manage their sailing schedules.',
-    tags:     ['React Native', 'TypeScript', 'Expo', 'PocketBase', 'Adobe Illustrator', 'Adobe XD'],
-    href:     'https://github.com/Mates24/LogBook_app',
+    title:    'LogBook – Digital Yacht Log',
+    desc:     'Built and shipped a professional digital yacht logbook for iOS. Features fast log entry, crew management, voyage maps, sailing atlas, statistics dashboard, and professional PDF export for charter operators and professional skippers.',
+    tags:     ['React Native', 'Expo', 'TypeScript', 'Node.js', 'PostgreSQL', 'Prisma', 'RevenueCat'],
+    href:     'https://apps.apple.com/us/app/logbook-digital-yacht-log/id6762569859',
     image:    '/projects/logbook.png',
-    featured: false,
+    featured: true,
     accent:   'rgba(56,189,248,0.12)',
   },
   {
