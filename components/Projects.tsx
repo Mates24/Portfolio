@@ -30,7 +30,7 @@ const PROJECTS: Project[] = [
     tags:     ['Next.js', 'TypeScript', 'Tailwind', 'GSAP', 'PocketBase', 'Railway', 'Cloudflare'],
     href:     'https://chataclaudia.sk',
     image:    '/projects/featured.png',
-    featured: true,
+    featured: false,
     accent:   'rgba(56,189,248,0.12)',
   },
   {
@@ -55,7 +55,7 @@ const PROJECTS: Project[] = [
   },
   {
     number:   '04',
-    title:    'LogBook – Digital Yacht Log',
+    title:    'LogBook - Digital Yacht Log',
     desc:     'Built and shipped a professional digital yacht logbook for iOS. Features fast log entry, crew management, voyage maps, sailing atlas, statistics dashboard, and professional PDF export for charter operators and professional skippers.',
     tags:     ['React Native', 'Expo', 'TypeScript', 'Node.js', 'PostgreSQL', 'Prisma', 'RevenueCat'],
     href:     'https://apps.apple.com/us/app/logbook-digital-yacht-log/id6762569859',
