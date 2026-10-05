@@ -1,29 +1,14 @@
 import type { Metadata, Viewport } from 'next'
-import { Bricolage_Grotesque, Instrument_Serif, JetBrains_Mono } from 'next/font/google'
+import { Bricolage_Grotesque } from 'next/font/google'
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import './globals.css'
 import SmoothScroll from '@/components/fx/SmoothScroll'
-import Cursor from '@/components/fx/Cursor'
 
 const display = Bricolage_Grotesque({
   subsets: ['latin', 'latin-ext'],
   variable: '--nf-display',
   display: 'swap',
-})
-const serif = Instrument_Serif({
-  subsets: ['latin', 'latin-ext'],
-  weight: '400',
-  style: ['normal', 'italic'],
-  variable: '--nf-serif',
-  display: 'swap',
-})
-const mono = JetBrains_Mono({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500'],
-  variable: '--nf-mono',
-  display: 'swap',
-  preload: false,
 })
 
 const BASE_URL = 'https://portfolio-eight-brown-77.vercel.app'
@@ -112,7 +97,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#02050b',
+  themeColor: '#03070d',
 }
 
 export default function RootLayout({
@@ -121,11 +106,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${display.variable} ${serif.variable} ${mono.variable}`}>
+    <html lang="en" className={`${display.variable}`}>
       <body className="antialiased">
         <SmoothScroll />
-        <Cursor />
-        <div className="grain" aria-hidden />
         {children}
         <Analytics />
         <SpeedInsights />

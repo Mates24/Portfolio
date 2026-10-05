@@ -1,7 +1,7 @@
 'use client'
 import { useRef } from 'react'
 import { motion, useMotionValueEvent, useTransform, type MotionValue } from 'framer-motion'
-import { ArrowUpRight, SectionLabel, useScrollProgress } from './fx/primitives'
+import { ArrowUpRight, useScrollProgress } from './fx/primitives'
 
 const ROUTE = 'M 110 630 C 220 600, 300 560, 380 500 S 470 380, 560 380 S 720 410, 730 330 S 700 170, 920 120'
 
@@ -13,27 +13,24 @@ const LAND = [
 ]
 
 const WAYPOINTS = [
-  { t: 0,    x: 110, y: 630, label: 'WP01 · Cast off' },
-  { t: 0.36, x: 380, y: 500, label: 'WP02 · Open water' },
-  { t: 0.68, x: 730, y: 330, label: 'WP03 · Pass the cape' },
-  { t: 1,    x: 920, y: 120, label: 'WP04 · Landfall' },
+  { t: 0,    x: 110, y: 630 },
+  { t: 0.36, x: 380, y: 500 },
+  { t: 0.68, x: 730, y: 330 },
+  { t: 1,    x: 920, y: 120 },
 ]
 
 const CHAPTERS = [
   {
-    kicker: 'Chapter 01 · The license',
-    title: <>I hold a <span className="font-serif font-normal italic text-sonar">captain&apos;s</span> license.</>,
-    body: 'Liptov is about as far from the sea as Slovakia gets, and still, whenever I can, I am at the helm. Being responsible for a boat and everyone on it is the best brief I have ever had.',
+    title: 'I have a captain’s license.',
+    body: 'Liptov is about as far from the sea as Slovakia gets, but I spend as much time on the water as I can.',
   },
   {
-    kicker: 'Chapter 02 · What the sea teaches',
-    title: <>Plan the passage. <span className="font-serif font-normal italic text-sonar">Respect</span> the conditions.</>,
-    body: 'Checklists, redundancy, calm decisions under pressure. The habits that keep a crew safe are the same ones I bring to software: prepare well, test everything, build systems that hold when it matters.',
+    title: 'Sailing changed how I work.',
+    body: 'On a boat you plan the passage, check everything twice and stay calm when the weather turns. I try to run projects the same way.',
   },
   {
-    kicker: 'Chapter 03 · Built on board',
-    title: <>So I built the logbook <span className="font-serif font-normal italic text-flare">I wanted.</span></>,
-    body: 'LogBook is a professional digital yacht log for skippers and charter crews: voyages, crew, maps, statistics and PDF export. Designed, built and shipped to the App Store by me.',
+    title: 'So I built LogBook.',
+    body: 'A digital yacht logbook for skippers and charter crews: voyages, crew, maps, statistics and PDF export. Designed and built by me, out on the App Store.',
     cta: { label: 'LogBook on the App Store', href: 'https://apps.apple.com/us/app/logbook-digital-yacht-log/id6762569859' },
   },
 ]
@@ -47,21 +44,18 @@ function Chapter({ i, progress, chapter }: { i: number; progress: MotionValue<nu
   // so the first/last chapters skip their outer fade.
   const input = first ? [b - 0.07, b - 0.01] : last ? [a + 0.01, a + 0.07] : [a + 0.01, a + 0.07, b - 0.07, b - 0.01]
   const opacity = useTransform(progress, input, first ? [1, 0] : last ? [0, 1] : [0, 1, 1, 0])
-  const y = useTransform(progress, input, first ? [0, -50] : last ? [50, 0] : [50, 0, 0, -50])
+  const y = useTransform(progress, input, first ? [0, -30] : last ? [30, 0] : [30, 0, 0, -30])
   const pointerEvents = useTransform(opacity, (o) => (o > 0.5 ? 'auto' : 'none'))
   return (
     <motion.div style={{ opacity, y, pointerEvents }} className="absolute inset-0 flex flex-col justify-center">
-      <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.22em] text-flare md:text-[11px]">{chapter.kicker}</p>
-      <h3 className="font-display text-[clamp(1.9rem,4vw,3.6rem)] font-bold leading-[1] tracking-[-0.035em] text-ink">{chapter.title}</h3>
-      <p className="mt-5 max-w-[460px] text-[15px] leading-relaxed text-mist md:text-base">{chapter.body}</p>
+      <p className="mb-4 text-[14px] text-fog">{i + 1} of {CHAPTERS.length}</p>
+      <h3 className="max-w-[16ch] font-display text-[clamp(1.9rem,3.8vw,3.4rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-ink">
+        {chapter.title}
+      </h3>
+      <p className="mt-5 max-w-[42ch] text-mist">{chapter.body}</p>
       {chapter.cta && (
-        <a
-          href={chapter.cta.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-7 inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(255,138,76,0.4)] bg-[rgba(255,138,76,0.08)] px-5 py-3 text-sm font-medium text-flare transition-colors hover:bg-[rgba(255,138,76,0.18)]"
-        >
-          {chapter.cta.label}
+        <a href={chapter.cta.href} target="_blank" rel="noopener noreferrer" className="group mt-7 inline-flex w-fit items-center gap-1.5 text-ink">
+          <span className="link-line">{chapter.cta.label}</span>
           <ArrowUpRight className="h-3.5 w-3.5" />
         </a>
       )}
@@ -69,14 +63,12 @@ function Chapter({ i, progress, chapter }: { i: number; progress: MotionValue<nu
   )
 }
 
-function Waypoint({ wp, last, routeT }: { wp: (typeof WAYPOINTS)[number]; last: boolean; routeT: MotionValue<number> }) {
+function Waypoint({ wp, routeT }: { wp: (typeof WAYPOINTS)[number]; routeT: MotionValue<number> }) {
   const from = Math.min(Math.max(wp.t - 0.02, 0), 0.96)
-  const opacity = useTransform(routeT, [from, from + 0.04], [0.15, 1])
+  const opacity = useTransform(routeT, [from, from + 0.04], [0.2, 1])
   return (
     <motion.g style={{ opacity }}>
-      <circle cx={wp.x} cy={wp.y} r="7" fill="none" stroke="#5ee7ff" strokeWidth="1.5" />
-      <circle cx={wp.x} cy={wp.y} r="2" fill="#5ee7ff" />
-      <text x={wp.x + 14} y={wp.y + (last ? 22 : -10)} fill="#e9f1f8" fontSize="13" fontFamily="var(--font-mono)" letterSpacing="1">{wp.label}</text>
+      <circle cx={wp.x} cy={wp.y} r="6" fill="#03070d" stroke="#eceff2" strokeWidth="1.5" />
     </motion.g>
   )
 }
@@ -84,12 +76,9 @@ function Waypoint({ wp, last, routeT }: { wp: (typeof WAYPOINTS)[number]; last: 
 function Chart({ progress }: { progress: MotionValue<number> }) {
   const pathRef = useRef<SVGPathElement>(null)
   const boatRef = useRef<SVGGElement>(null)
-  const hdgRef  = useRef<HTMLSpanElement>(null)
-  const dtgRef  = useRef<HTMLSpanElement>(null)
-  const legRef  = useRef<HTMLSpanElement>(null)
 
   const routeT  = useTransform(progress, [0.04, 0.94], [0, 1], { clamp: true })
-  const compass = useTransform(progress, [0, 1], [0, -200])
+  const compass = useTransform(progress, [0, 1], [0, -160])
 
   useMotionValueEvent(routeT, 'change', (t) => {
     const path = pathRef.current
@@ -100,108 +89,72 @@ function Chart({ progress }: { progress: MotionValue<number> }) {
     const r = path.getPointAtLength(Math.max(0, L * t - 2))
     const angle = (Math.atan2(q.y - r.y, q.x - r.x) * 180) / Math.PI
     boatRef.current.setAttribute('transform', `translate(${p.x} ${p.y}) rotate(${angle + 90})`)
-    const hdg = (Math.round(angle + 90) + 360) % 360
-    if (hdgRef.current) hdgRef.current.textContent = `${String(hdg).padStart(3, '0')}°`
-    if (dtgRef.current) dtgRef.current.textContent = `${(24 * (1 - t)).toFixed(1)} nm`
-    if (legRef.current) legRef.current.textContent = `0${Math.min(3, Math.floor(t * 3) + 1)}/03`
   })
 
   return (
-    <div className="panel relative h-full w-full overflow-hidden rounded-[28px]">
+    <div className="relative h-full w-full overflow-hidden rounded-lg border border-[var(--line)] bg-abyss">
       <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
         <defs>
-          <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(140,200,255,0.08)" strokeWidth="1" />
+          <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(236,239,242,0.06)" strokeWidth="1" />
           </pattern>
-          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#ff8a4c" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#ff8a4c" stopOpacity="0" />
-          </radialGradient>
         </defs>
         <rect width="1000" height="700" fill="url(#grid)" />
 
-        {/* Depth contours + land */}
         {LAND.map((d, i) => (
           <g key={i}>
-            <path d={d} fill="none" stroke="rgba(94,231,255,0.05)" strokeWidth="60" strokeLinejoin="round" />
-            <path d={d} fill="none" stroke="rgba(94,231,255,0.08)" strokeWidth="28" strokeLinejoin="round" />
-            <path d={d} fill="none" stroke="rgba(94,231,255,0.25)" strokeWidth="1" strokeDasharray="3 5" />
-            <path d={d} fill="#0c1b33" stroke="rgba(94,231,255,0.45)" strokeWidth="1.2" />
+            <path d={d} fill="none" stroke="rgba(127,216,236,0.06)" strokeWidth="44" strokeLinejoin="round" />
+            <path d={d} fill="#101c2c" stroke="rgba(236,239,242,0.3)" strokeWidth="1" />
           </g>
         ))}
 
-        {/* Sounding numbers scattered on the chart */}
         {[[200, 420, 18], [460, 620, 32], [640, 260, 27], [860, 420, 41], [330, 300, 12], [700, 610, 36], [560, 160, 22]].map(([x, y, d]) => (
-          <text key={`${x}-${y}`} x={x} y={y} fill="rgba(139,163,189,0.5)" fontSize="13" fontFamily="var(--font-mono)">{d}</text>
+          <text key={`${x}-${y}`} x={x} y={y} fill="rgba(140,151,165,0.55)" fontSize="13" fontStyle="italic">{d}</text>
         ))}
 
-        {/* Planned route (ghost) + sailed route */}
-        <path d={ROUTE} fill="none" stroke="rgba(233,241,248,0.18)" strokeWidth="1.5" strokeDasharray="6 8" />
-        <motion.path ref={pathRef} d={ROUTE} fill="none" stroke="#ff8a4c" strokeWidth="2.5" strokeLinecap="round" style={{ pathLength: routeT }} />
+        <path d={ROUTE} fill="none" stroke="rgba(236,239,242,0.2)" strokeWidth="1.5" strokeDasharray="5 7" />
+        <motion.path ref={pathRef} d={ROUTE} fill="none" stroke="#ff8a4c" strokeWidth="2" strokeLinecap="round" style={{ pathLength: routeT }} />
 
-        {WAYPOINTS.map((w, i) => (
-          <Waypoint key={w.label} wp={w} last={i === WAYPOINTS.length - 1} routeT={routeT} />
-        ))}
+        {WAYPOINTS.map((w) => <Waypoint key={w.t} wp={w} routeT={routeT} />)}
 
-        {/* Boat marker */}
         <g ref={boatRef} transform="translate(110 630)">
-          <circle r="26" fill="url(#glow)" opacity="0.35" />
-          <path d="M0 -14 L8 10 L0 5 L-8 10 Z" fill="#ff8a4c" stroke="#ffd9c4" strokeWidth="1" />
+          <path d="M0 -13 L7 9 L0 5 L-7 9 Z" fill="#ff8a4c" />
         </g>
       </svg>
 
-      {/* Compass rose */}
-      <motion.svg
-        viewBox="0 0 200 200"
-        className="absolute right-4 top-4 h-24 w-24 md:right-6 md:top-6 md:h-32 md:w-32"
-        style={{ rotate: compass }}
-        aria-hidden
-      >
-        <circle cx="100" cy="100" r="92" fill="rgba(5,11,23,0.6)" stroke="rgba(94,231,255,0.35)" />
-        <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(94,231,255,0.15)" />
+      <motion.svg viewBox="0 0 200 200" className="absolute right-5 top-5 h-20 w-20 md:h-24 md:w-24" style={{ rotate: compass }} aria-hidden>
+        <circle cx="100" cy="100" r="92" fill="none" stroke="rgba(236,239,242,0.25)" />
         {Array.from({ length: 36 }).map((_, i) => (
-          <line key={i} x1="100" y1="10" x2="100" y2={i % 9 === 0 ? 26 : 18} stroke="rgba(94,231,255,0.5)" strokeWidth={i % 9 === 0 ? 2 : 1} transform={`rotate(${i * 10} 100 100)`} />
+          <line key={i} x1="100" y1="10" x2="100" y2={i % 9 === 0 ? 24 : 16} stroke="rgba(236,239,242,0.4)" strokeWidth="1" transform={`rotate(${i * 10} 100 100)`} />
         ))}
-        <path d="M100 30 L110 100 L100 170 L90 100 Z" fill="rgba(94,231,255,0.15)" stroke="#5ee7ff" />
-        <path d="M100 30 L110 100 L90 100 Z" fill="#ff8a4c" />
-        <path d="M30 100 L100 92 L170 100 L100 108 Z" fill="rgba(94,231,255,0.1)" stroke="rgba(94,231,255,0.5)" />
-        <text x="100" y="52" textAnchor="middle" fill="#e9f1f8" fontSize="14" fontFamily="var(--font-mono)">N</text>
+        <path d="M100 34 L108 100 L100 166 L92 100 Z" fill="none" stroke="rgba(236,239,242,0.5)" />
+        <path d="M100 34 L108 100 L92 100 Z" fill="#ff8a4c" />
+        <text x="100" y="56" textAnchor="middle" fill="#eceff2" fontSize="14">N</text>
       </motion.svg>
-
-      {/* HUD readout */}
-      <div className="absolute inset-x-4 bottom-4 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--line)] font-mono text-[10px] uppercase tracking-[0.15em] md:inset-x-6 md:bottom-6 md:text-[11px]">
-        {[
-          ['HDG', hdgRef, '017°'],
-          ['DTG', dtgRef, '24.0 nm'],
-          ['LEG', legRef, '01/03'],
-        ].map(([label, ref, init]) => (
-          <div key={label as string} className="bg-[rgba(5,11,23,0.85)] px-3 py-2.5 backdrop-blur md:px-4">
-            <p className="text-fog">{label as string}</p>
-            <span ref={ref as React.RefObject<HTMLSpanElement>} className="text-ink">{init as string}</span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
 
 export default function Skipper() {
   const ref = useRef<HTMLElement>(null)
-  const scrollYProgress = useScrollProgress({ target: ref, offset: ['start start', 'end end'] })
+  const progress = useScrollProgress({ target: ref, offset: ['start start', 'end end'] })
 
   return (
-    <section id="skipper" ref={ref} className="relative h-[340vh]">
-      <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden pt-24 pb-6 md:pt-28 md:pb-10">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_70%_60%,rgba(43,183,224,0.08),transparent_70%)]" />
-        <div className="container-wide relative flex min-h-0 flex-1 flex-col">
-          <SectionLabel index="04">Off the keyboard</SectionLabel>
-          <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:grid-rows-1 lg:gap-14">
-            <div className="relative">
+    <section id="skipper" ref={ref} className="relative h-[320vh]">
+      <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden pb-6 pt-20 md:pb-10 md:pt-24">
+        <div className="container-wide flex min-h-0 flex-1 flex-col">
+          <div className="grid grid-cols-1 border-t border-[var(--line)] pt-6 md:grid-cols-12">
+            <p className="text-[14px] text-mist md:col-span-3">Sailing</p>
+          </div>
+          <div className="mt-6 grid min-h-0 flex-1 grid-rows-[minmax(0,0.85fr)_minmax(0,1.15fr)] gap-6 md:grid-cols-12 md:grid-rows-1">
+            <div className="relative md:col-span-4 md:col-start-4 md:pr-6">
               {CHAPTERS.map((c, i) => (
-                <Chapter key={i} i={i} progress={scrollYProgress} chapter={c} />
+                <Chapter key={i} i={i} progress={progress} chapter={c} />
               ))}
             </div>
-            <Chart progress={scrollYProgress} />
+            <div className="md:col-span-5">
+              <Chart progress={progress} />
+            </div>
           </div>
         </div>
       </div>
