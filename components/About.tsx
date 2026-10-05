@@ -1,202 +1,106 @@
 'use client'
 import Image from 'next/image'
-import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { motion } from 'framer-motion'
+import { Counter, EASE_OUT, FadeUp, ScrollText, SectionLabel, Tilt } from './fx/primitives'
 
-const EASE_SMOOTH = [0.4, 0, 0.2, 1] as [number, number, number, number]
-
-const revealVariants = {
-  hidden: { opacity: 0, y: 32 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { ease: EASE_SMOOTH, duration: 0.75 },
-  },
-}
-
-const CHIPS = [
-  'Based in Liptovský Mikuláš',
-  'Open to remote',
-  'Full-stack',
-  'UI / UX',
-  'Systems thinking',
-  'React / Next.js',
+const STATS = [
+  { value: 6,   pad: 2, suffix: '',  label: 'Projects shipped',        sub: 'Web, app & brand' },
+  { value: 1,   pad: 2, suffix: '',  label: 'App on the App Store',    sub: 'LogBook, for skippers' },
+  { value: 576, pad: 3, suffix: 'm', label: 'Above sea level',         sub: 'And still a skipper' },
 ]
 
 export default function About() {
-  const chipsRef = useRef(null)
-  const chipsInView = useInView(chipsRef, { once: true, margin: '-60px' })
-
   return (
-    <section id="about" className="relative py-12 md:py-24 overflow-hidden">
-      {/* ── Ambient background glow ── */}
-      <div className="
-        absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-        w-[800px] h-[500px] rounded-full pointer-events-none
-        bg-[radial-gradient(ellipse,rgba(56,189,248,0.05)_0%,transparent_70%)]
-      " />
+    <section id="about" className="relative py-20 md:py-32">
+      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(43,183,224,0.08),transparent_65%)]" />
 
-      <div className="container-wide relative z-10">
+      <div className="container-wide relative">
+        <SectionLabel index="01">About</SectionLabel>
 
-        {/* ── Section label ── */}
-        <motion.div
-          className="flex items-center gap-3 mb-6 md:mb-14"
-          initial={{ opacity: 0, x: -16 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6, ease: EASE_SMOOTH }}
-        >
-          <div className="w-8 h-px bg-gradient-to-r from-[#38bdf8] to-transparent" />
-          <span className="font-mono text-[11px] text-[#38bdf8] tracking-[0.15em] uppercase">
-            About
-          </span>
-        </motion.div>
-
-        {/* ── Two-column grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-
-          {/* ── Left — statement + bio + chips ── */}
+        <div className="grid grid-cols-1 items-start gap-14 lg:grid-cols-[1.35fr_1fr] lg:gap-20">
           <div>
+            <ScrollText
+              className="font-display text-[clamp(1.75rem,3.6vw,3.25rem)] font-semibold leading-[1.12] tracking-[-0.025em] text-ink"
+              text="Hi, I'm Mathias. I work where *engineering meets *design, writing code as considered as the interfaces it produces. From a booking system for a mountain chalet to a full e-commerce platform and an iOS app for sailors, I sweat the details most people never notice. That's *exactly the point."
+            />
 
-            <motion.h2
-              className="
-                font-display font-bold leading-[1.15] tracking-[-0.02em]
-                text-[clamp(2rem,3.5vw,2.75rem)] text-[#e2eaf4]
-                mb-7
-              "
-              variants={revealVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-60px' }}
-            >
-              I build things that are
-              <br />
-              <span className="text-gradient">precise, intentional,</span>
-              <br />
-              and hard to forget
-            </motion.h2>
-
-            <motion.p
-              className="text-[#7a9bbf] text-base leading-[1.85] mb-10 max-w-[440px]"
-              variants={revealVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ delay: 0.1 }}
-            >
-              Hello, my name is Mathias Matejčík. I&apos;m based in Liptovský Mikuláš,
-              and I work at the intersection of engineering
-              and design — writing code that&apos;s as considered as the
-              interfaces it produces. I care deeply about the details most
-              people never notice, and I think that&apos;s exactly the point.
-            </motion.p>
-
-            {/* Chips — pure CSS animation, no hydration flicker */}
-            <div
-              ref={chipsRef}
-              className={`flex flex-wrap gap-2 ${chipsInView ? 'chips-visible' : ''}`}
-            >
-              {CHIPS.map((chip, i) => (
+            <FadeUp delay={0.1} className="mt-10 flex flex-wrap gap-2">
+              {['Full-stack', 'iOS · React Native', 'UI / UX', 'Brand & packaging', 'Custom CMS', 'Open to remote'].map((chip) => (
                 <span
                   key={chip}
-                  className="
-                    chip-animate
-                    inline-flex items-center gap-1.5
-                    px-3.5 py-1.5 rounded-full
-                    border border-[rgba(99,179,237,0.14)]
-                    bg-[rgba(56,189,248,0.04)]
-                    text-[12.5px] text-[#7a9bbf]
-                    hover:border-[rgba(56,189,248,0.35)]
-                    hover:text-[#c8ddf0]
-                    hover:bg-[rgba(56,189,248,0.08)]
-                    transition-colors duration-200
-                    cursor-default
-                  "
-                  style={{
-                    animationDelay: `${i * 0.06 + 0.15}s`,
-                  }}
+                  className="rounded-full border border-[var(--line-bright)] bg-[rgba(94,231,255,0.04)] px-3.5 py-1.5 font-mono text-[11px] tracking-[0.04em] text-mist transition-colors hover:border-sonar hover:text-ink"
                 >
-                  <span className="w-1 h-1 rounded-full bg-[#38bdf8] opacity-60" />
                   {chip}
                 </span>
               ))}
-            </div>
-
+            </FadeUp>
           </div>
 
-          {/* ── Right — portrait ── */}
+          {/* Portrait — 3D tilt card with HUD frame */}
           <motion.div
-            className="relative w-full max-w-[360px] lg:ml-auto mt-2 lg:mt-0"
-            variants={revealVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ delay: 0.2 }}
+            className="relative mx-auto w-full max-w-[400px] lg:mx-0 lg:ml-auto"
+            initial={{ opacity: 0, rotateY: -25, rotateX: 8, y: 60 }}
+            whileInView={{ opacity: 1, rotateY: 0, rotateX: 0, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 1.4, ease: EASE_OUT }}
+            style={{ transformPerspective: 1200 }}
           >
-            <div className="
-              absolute -inset-5 rounded-2xl pointer-events-none
-              bg-[radial-gradient(ellipse,rgba(56,189,248,0.07)_0%,transparent_70%)]
-            " />
+            <Tilt max={12} className="relative rounded-[28px]">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-[var(--line-bright)] bg-deep">
+                <Image
+                  src="/portrait.jpeg"
+                  alt="Mathias Matejčík"
+                  fill
+                  sizes="(max-width: 1024px) 90vw, 400px"
+                  className="object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(2,5,11,0.85)] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(94,231,255,0.04)_50%)] bg-[length:100%_4px] mix-blend-overlay" />
+                <div className="absolute inset-x-5 bottom-5 flex items-end justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-mist">
+                  <div>
+                    <p className="text-fog">Subject</p>
+                    <p className="text-ink">M. Matejčík</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-fog">Role</p>
+                    <p className="text-ink">Eng · Design · Skipper</p>
+                  </div>
+                </div>
+              </div>
 
-            {[
-              'top-[-8px] left-[-8px]',
-              'top-[-8px] right-[-8px] rotate-90',
-              'bottom-[-8px] left-[-8px] -rotate-90',
-              'bottom-[-8px] right-[-8px] rotate-180',
-            ].map((pos, i) => (
-              <span
-                key={i}
-                className={`absolute w-6 h-6 z-10 ${pos}`}
-                style={{
-                  backgroundImage: `
-                    linear-gradient(to right, #38bdf8, #38bdf8),
-                    linear-gradient(to bottom, #38bdf8, #38bdf8)
-                  `,
-                  backgroundSize: '100% 1.5px, 1.5px 100%',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'top left, top left',
-                  filter: 'drop-shadow(0 0 4px rgba(56,189,248,0.6))',
-                }}
-              />
-            ))}
+              {/* Corner brackets */}
+              {['-left-2 -top-2', '-right-2 -top-2 rotate-90', '-bottom-2 -right-2 rotate-180', '-bottom-2 -left-2 -rotate-90'].map((pos) => (
+                <span key={pos} className={`absolute h-6 w-6 border-l-[1.5px] border-t-[1.5px] border-sonar ${pos}`} style={{ transform: 'translateZ(30px)' }} />
+              ))}
 
-            <div className="
-              relative w-full aspect-[4/5] rounded-2xl overflow-hidden
-              border border-[rgba(99,179,237,0.12)]
-              bg-[#0a1628]
-            ">
-              <Image
-                src="/portrait.jpeg"
-                alt="Mathias Matejčík"
-                fill
-                sizes="(max-width: 1024px) 100vw, 360px"
-                className="object-cover object-top"
-                priority
-              />
-            </div>
-
-            <motion.div
-              className="
-                absolute -bottom-4 -left-5 z-20
-                px-3 py-1 rounded-xl
-                bg-[rgba(6,13,31,0.92)] backdrop-blur-xl
-                border border-[rgba(56,189,248,0.18)]
-                shadow-[0_8px_32px_rgba(0,0,0,0.4)]
-              "
-              initial={{ opacity: 0, y: 12, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5, duration: 0.5, ease: EASE_SMOOTH }}
-            >
-              <p className="font-mono text-[10px] text-[#3d5a7a] tracking-[0.1em] uppercase">
-                Currently
-              </p>
-              <p className="font-display font-semibold text-[13px] text-[#e2eaf4]">
-                Building in public
-              </p>
-            </motion.div>
-
+              {/* Floating badge pops out in 3D */}
+              <div
+                className="absolute -left-4 top-8 rounded-2xl border border-[rgba(255,138,76,0.35)] bg-[rgba(5,11,23,0.85)] px-4 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl md:-left-10"
+                style={{ transform: 'translateZ(70px)' }}
+              >
+                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-fog">Licensed</p>
+                <p className="flex items-center gap-2 font-display text-sm font-semibold text-ink">
+                  <svg className="h-4 w-4 text-flare" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <circle cx="12" cy="5" r="2.2" /><path d="M12 7.2V21M5 12H3a9 9 0 0 0 18 0h-2M8 10h8" />
+                  </svg>
+                  Skipper
+                </p>
+              </div>
+            </Tilt>
           </motion.div>
+        </div>
+
+        {/* Stats */}
+        <div className="mt-20 grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--line)] sm:grid-cols-3 md:mt-28">
+          {STATS.map((s, i) => (
+            <FadeUp key={s.label} delay={i * 0.1} y={24} className="bg-abyss p-7 md:p-9">
+              <p className="font-display text-[clamp(2.75rem,5vw,4.25rem)] font-bold leading-none tracking-[-0.04em] text-ink">
+                <Counter to={s.value} pad={s.pad} suffix={s.suffix} />
+              </p>
+              <p className="mt-4 text-sm font-medium text-ink">{s.label}</p>
+              <p className="font-mono text-[11px] tracking-[0.04em] text-fog">{s.sub}</p>
+            </FadeUp>
+          ))}
         </div>
       </div>
     </section>

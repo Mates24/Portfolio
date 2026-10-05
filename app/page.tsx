@@ -1,8 +1,11 @@
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
+import Marquee from '@/components/Marquee'
 import About from '@/components/About'
-import Skills from '@/components/Skills'
+import Services from '@/components/Services'
 import Projects from '@/components/Projects'
+import Skills from '@/components/Skills'
+import Skipper from '@/components/Skipper'
 import Contact from '@/components/Contact'
 import Footer from '@/components/Footer'
 
@@ -11,9 +14,12 @@ export default function Home() {
     <main className="relative min-h-screen">
       <Navbar />
       <Hero />
+      <Marquee />
       <About />
-      <Skills />
+      <Services />
       <Projects />
+      <Skills />
+      <Skipper />
       <Contact />
       <Footer />
     </main>

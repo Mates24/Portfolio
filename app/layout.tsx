@@ -1,26 +1,27 @@
 import type { Metadata, Viewport } from 'next'
-import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google'
+import { Bricolage_Grotesque, Instrument_Serif, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import './globals.css'
+import SmoothScroll from '@/components/fx/SmoothScroll'
+import Cursor from '@/components/fx/Cursor'
 
-const syne = Syne({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-display',
+const display = Bricolage_Grotesque({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--nf-display',
   display: 'swap',
 })
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-body',
+const serif = Instrument_Serif({
+  subsets: ['latin', 'latin-ext'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--nf-serif',
   display: 'swap',
-  preload: false,
 })
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-mono',
+const mono = JetBrains_Mono({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500'],
+  variable: '--nf-mono',
   display: 'swap',
   preload: false,
 })
@@ -30,11 +31,11 @@ const BASE_URL = 'https://portfolio-eight-brown-77.vercel.app'
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'Mathias Matejčík — Engineer & Designer',
+    default: 'Mathias Matejčík — Engineer, Designer & Skipper',
     template: '%s | Mathias Matejčík',
   },
   description:
-    'Software Engineer and Designer crafting precise, intentional digital experiences. Based in Liptovský Mikuláš, open to remote work.',
+    'Software engineer and designer building websites, iOS apps and brands, from first sketch to App Store. Licensed skipper and maker of LogBook. Based in Liptovský Mikuláš, Slovakia.',
   keywords: [
     'software engineer',
     'UI designer',
@@ -58,6 +59,12 @@ export const metadata: Metadata = {
     'Tvorba vizuálnej identity',
     'Liptovský Mikuláš',
     'Slovensko',
+    'e-shop na mieru',
+    'React Native',
+    'iOS app developer',
+    'LogBook yacht log',
+    'Postele Liptov',
+    'skipper',
   ],
   authors: [{ name: 'Mathias Matejčík', url: BASE_URL }],
   creator: 'Mathias Matejčík',
@@ -67,24 +74,24 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: BASE_URL,
     siteName: 'Mathias Matejčík',
-    title: 'Mathias Matejčík — Engineer & Designer',
+    title: 'Mathias Matejčík — Engineer, Designer & Skipper',
     description:
-      'Software Engineer and Designer crafting precise, intentional digital experiences. Based in Liptovský Mikuláš, open to remote work.',
+      'Software engineer and designer building websites, iOS apps and brands, from first sketch to App Store. Licensed skipper and maker of LogBook. Based in Liptovský Mikuláš, Slovakia.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Mathias Matejčík — Engineer & Designer',
+        alt: 'Mathias Matejčík — Engineer, Designer & Skipper',
       },
     ],
   },
 
   twitter: {
     card: 'summary_large_image',
-    title: 'Mathias Matejčík — Engineer & Designer',
+    title: 'Mathias Matejčík — Engineer, Designer & Skipper',
     description:
-      'Software Engineer and Designer crafting precise, intentional digital experiences.',
+      'Websites, iOS apps and brands, from first sketch to App Store. Licensed skipper and maker of LogBook.',
     images: ['/og-image.png'],
   },
 
@@ -105,7 +112,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#060d1f',
+  themeColor: '#02050b',
 }
 
 export default function RootLayout({
@@ -114,8 +121,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-grid-overlay antialiased">
+    <html lang="en" className={`${display.variable} ${serif.variable} ${mono.variable}`}>
+      <body className="antialiased">
+        <SmoothScroll />
+        <Cursor />
+        <div className="grain" aria-hidden />
         {children}
         <Analytics />
         <SpeedInsights />

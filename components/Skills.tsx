@@ -1,311 +1,180 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { SKILL_DOMAINS } from '@/lib/data'
+import { EASE_OUT, RevealLines, SectionLabel } from './fx/primitives'
 
-// Brand colors per skill 
-const BRAND: Record<string, string> = {
-  'TypeScript':    '#3178c6',
-  'JavaScript':    '#f7df1e',
-  'React':         '#61dafb',
-  'React Native':  '#61dafb',
-  'Next.js':       '#ffffff',
-  'Expo':          '#38bdf8',
-  'Node.js':       '#5fa04e',
-  'PHP':           '#777bb4',
-  'MySQL':         '#4479a1',
-  'PostgreSQL':    '#4169e1',
-  'PocketBase':    '#b8dbe4',
-  'Framer Motion': '#0055ff',
-  'Figma':         '#f24e1e',
-  'Illustrator':   '#ff9a00',
-  'Photoshop':     '#31a8ff',
-  'Adobe XD':      '#ff61f6',
-  'Premiere Pro':  '#9999ff',
-  'Design Systems':'#38bdf8',
-  'Typography':    '#38bdf8',
-  'Git':           '#f05032',
-  'GitHub':        '#ffffff',
-  'Docker':        '#2496ed',
-  'Vercel':        '#ffffff',
-  'Linux':         '#fcc624',
-  'Tailwind':      '#06b6d4',
-  'Railway':       '#c8d3d5',
-  'Cloudflare':    '#f6821f',
-}
+const ALL = SKILL_DOMAINS.flatMap((d) => d.skills.map(([name, color]) => ({ name, color })))
 
-const DOMAINS = [
-  {
-    letter: 'E',
-    icon:   '⚙',
-    title:  'Engineering',
-    sub:    'Core stack',
-    skills: [
-      { name: 'TypeScript',    icon: { type: 'devicon', cls: 'devicon-typescript-plain'        } },
-      { name: 'JavaScript',    icon: { type: 'devicon', cls: 'devicon-javascript-plain'        } },
-      { name: 'React',         icon: { type: 'devicon', cls: 'devicon-react-original'          } },
-      { name: 'React Native',  icon: { type: 'devicon', cls: 'devicon-react-original'          } },
-      { name: 'Next.js',       icon: { type: 'devicon', cls: 'devicon-nextjs-plain'            } },
-      { name: 'Expo',          icon: { type: 'devicon', cls: 'devicon-expo-original'           } },
-      { name: 'Node.js',       icon: { type: 'devicon', cls: 'devicon-nodejs-plain'            } },
-      { name: 'PHP',           icon: { type: 'devicon', cls: 'devicon-php-plain'               } },
-      { name: 'MySQL',         icon: { type: 'devicon', cls: 'devicon-mysql-plain'             } },
-      { name: 'PostgreSQL',    icon: { type: 'devicon', cls: 'devicon-postgresql-plain'        } },
-      { name: 'PocketBase',    icon: { type: 'simple',  slug: 'pocketbase'                     } },
-      { name: 'Framer Motion', icon: { type: 'simple',  slug: 'framer'                         } },
-    ],
-  },
-  {
-    letter: 'D',
-    icon:   '✦',
-    title:  'Design',
-    sub:    'Craft & tools',
-    skills: [
-      { name: 'Figma',         icon: { type: 'devicon', cls: 'devicon-figma-plain'             } },
-      { name: 'Illustrator',   icon: { type: 'devicon', cls: 'devicon-illustrator-plain'       } },
-      { name: 'Photoshop',     icon: { type: 'devicon', cls: 'devicon-photoshop-plain'         } },
-      { name: 'Adobe XD',      icon: { type: 'devicon', cls: 'devicon-xd-plain'                } },
-      { name: 'Premiere Pro',  icon: { type: 'devicon', cls: 'devicon-premierepro-plain'       } },
-      { name: 'Design Systems',icon: { type: 'none',    slug: ''                               } },
-      { name: 'Typography',    icon: { type: 'none',    slug: ''                               } },
-    ],
-  },
-  {
-    letter: 'T',
-    icon:   '◈',
-    title:  'Tooling',
-    sub:    'Environment',
-    skills: [
-      { name: 'Git',           icon: { type: 'devicon', cls: 'devicon-git-plain'               } },
-      { name: 'GitHub',        icon: { type: 'devicon', cls: 'devicon-github-original'         } },
-      { name: 'Docker',        icon: { type: 'devicon', cls: 'devicon-docker-plain'            } },
-      { name: 'Vercel',        icon: { type: 'devicon', cls: 'devicon-vercel-plain'            } },
-      { name: 'Linux',         icon: { type: 'devicon', cls: 'devicon-linux-plain'             } },
-      { name: 'Tailwind',      icon: { type: 'devicon', cls: 'devicon-tailwindcss-original'    } },
-      { name: 'Railway',       icon: { type: 'devicon', cls: 'devicon-railway-plain'           } },
-      { name: 'Cloudflare',    icon: { type: 'devicon', cls: 'devicon-cloudflare-plain'        } },
-    ],
-  },
-]
-
-// Types
-type SkillIconDef =
-  | { type: 'devicon'; cls: string }
-  | { type: 'simple';  slug: string }
-  | { type: 'none';    slug: string }
-
-// Icon renderer
-function SkillIcon({
-  icon,
-  hovered,
-  brand,
-}: {
-  icon: SkillIconDef
-  hovered: boolean
-  brand: string
-}) {
-  const style: React.CSSProperties = hovered
-    ? { color: brand, filter: 'none', transition: 'all 0.25s ease' }
-    : { color: 'rgba(178,212,232,0.45)', filter: 'grayscale(1) brightness(1.6)', transition: 'all 0.25s ease' }
-
-  if (icon.type === 'devicon') {
-    return <i className={`${icon.cls} text-[15px] flex-shrink-0`} style={style} />
-  }
-
-  if (icon.type === 'simple') {
-    return (
-      <img
-        src={
-          hovered
-            ? `https://cdn.simpleicons.org/${icon.slug}/${brand.replace('#', '')}`
-            : `https://cdn.simpleicons.org/${icon.slug}/b2d4e8`
-        }
-        alt=""
-        width={14}
-        height={14}
-        className="flex-shrink-0"
-        style={{
-          filter:     hovered ? 'none' : 'grayscale(1) brightness(1.6)',
-          transition: 'filter 0.25s ease',
-          opacity:    hovered ? 1 : 0.45,
-        }}
-      />
-    )
-  }
-
-  return (
-    <span
-      className="w-3.5 h-3.5 rounded-sm flex-shrink-0 flex items-center justify-center text-[7px]"
-      style={{
-        border: `1px solid ${hovered ? brand : 'rgba(99,179,237,0.2)'}`,
-        background: hovered ? `${brand}18` : 'rgba(56,189,248,0.08)',
-        color: hovered ? brand : '#3d5a7a',
-        transition: 'all 0.25s ease',
-      }}
-    >
-      ✦
-    </span>
-  )
-}
-
-// Skill pill
-function SkillPill({ skill }: { skill: typeof DOMAINS[number]['skills'][number] }) {
-  const [hovered, setHovered] = useState(false)
-  const brand = BRAND[skill.name] ?? '#38bdf8'
-
-  // Hex → rgba helper for glow/tint
-  const hexToRgb = (hex: string) => {
-    const r = parseInt(hex.slice(1, 3), 16)
-    const g = parseInt(hex.slice(3, 5), 16)
-    const b = parseInt(hex.slice(5, 7), 16)
-    return `${r},${g},${b}`
-  }
-
-  const rgb = /^#[0-9a-fA-F]{6}$/.test(brand) ? hexToRgb(brand) : '56,189,248'
-
-  return (
-    <span
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-default"
-      style={{
-        border:     `1px solid ${hovered ? `rgba(${rgb},0.35)` : 'rgba(99,179,237,0.12)'}`,
-        background: hovered ? `rgba(${rgb},0.08)` : 'rgba(56,189,248,0.04)',
-        boxShadow:  hovered ? `0 0 12px rgba(${rgb},0.15)` : 'none',
-        transition: 'all 0.25s ease',
-      }}
-    >
-      <SkillIcon icon={skill.icon as SkillIconDef} hovered={hovered} brand={brand} />
-      <span
-        className="font-mono text-[11px] tracking-[0.03em]"
-        style={{
-          color:      hovered ? '#e2eaf4' : '#7a9bbf',
-          transition: 'color 0.25s ease',
-        }}
-      >
-        {skill.name}
-      </span>
-    </span>
-  )
-}
-
-// Card
-function SkillCard({
-  domain,
-  index,
-}: {
-  domain: typeof DOMAINS[number]
-  index:  number
-}) {
-  const ref = useRef<HTMLDivElement>(null)
+/* Fibonacci sphere of tags, rotated in JS and projected with 2D transforms (cheap + crisp text). */
+function TagSphere() {
+  const wrap  = useRef<HTMLDivElement>(null)
+  const items = useRef<(HTMLSpanElement | null)[]>([])
 
   useEffect(() => {
-    const el = ref.current
+    const el = wrap.current
     if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.style.animationDelay = `${index * 0.1}s`
-          el.classList.add('in-view')
-          obs.disconnect()
-        }
-      },
-      { threshold: 0.2 }
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [index])
+    const n = ALL.length
+    const pts = ALL.map((_, i) => {
+      const phi = Math.acos(1 - (2 * (i + 0.5)) / n)
+      const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 0.5)
+      return [Math.cos(theta) * Math.sin(phi), Math.sin(theta) * Math.sin(phi), Math.cos(phi)]
+    })
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const idle = reduce ? 0.0006 : 0.0028
+    const mouse = { x: 0, y: 0, inside: false }
+    let rx = 0.3, ry = 0, vx = 0, vy = idle
+    let visible = true
+    let drag: { x: number; y: number } | null = null
+    let raf = 0
+
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect()
+      if (drag) {
+        vy = (e.clientX - drag.x) * 0.0009
+        vx = -(e.clientY - drag.y) * 0.0009
+        drag = { x: e.clientX, y: e.clientY }
+        return
+      }
+      mouse.x = (e.clientX - r.left) / r.width - 0.5
+      mouse.y = (e.clientY - r.top) / r.height - 0.5
+      mouse.inside = true
+    }
+    const onLeave = () => { mouse.inside = false; drag = null }
+    const onDown = (e: PointerEvent) => { drag = { x: e.clientX, y: e.clientY } }
+    const onUp = () => { drag = null }
+
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting })
+    io.observe(el)
+
+    const tick = () => {
+      raf = requestAnimationFrame(tick)
+      if (!visible) return
+      if (!drag) {
+        const tx = mouse.inside ? -mouse.y * 0.02 : 0
+        const ty = mouse.inside ? mouse.x * 0.02 : idle
+        vx += (tx - vx) * 0.04
+        vy += (ty - vy) * 0.04
+      }
+      rx += vx
+      ry += vy
+      const R = el.offsetWidth * 0.4
+      const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry)
+      for (let i = 0; i < n; i++) {
+        const node = items.current[i]
+        if (!node) continue
+        const [x0, y0, z0] = pts[i]
+        // rotate Y then X
+        const x1 = x0 * cy + z0 * sy
+        const z1 = -x0 * sy + z0 * cy
+        const y2 = y0 * cx - z1 * sx
+        const z2 = y0 * sx + z1 * cx
+        const depth = (z2 + 1) / 2 // 0 back … 1 front
+        node.style.transform = `translate3d(${x1 * R}px, ${y2 * R}px, 0) translate(-50%, -50%) scale(${0.55 + depth * 0.65})`
+        node.style.opacity = String(0.12 + depth * 0.88)
+        node.style.zIndex = String(Math.round(depth * 100))
+        node.style.filter = depth < 0.35 ? 'blur(1px)' : 'none'
+      }
+    }
+    raf = requestAnimationFrame(tick)
+
+    el.addEventListener('pointermove', onMove)
+    el.addEventListener('pointerleave', onLeave)
+    el.addEventListener('pointerdown', onDown)
+    window.addEventListener('pointerup', onUp)
+    return () => {
+      cancelAnimationFrame(raf)
+      io.disconnect()
+      el.removeEventListener('pointermove', onMove)
+      el.removeEventListener('pointerleave', onLeave)
+      el.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('pointerup', onUp)
+    }
+  }, [])
 
   return (
-    <div
-      ref={ref}
-      className="skill-card group relative rounded-[20px] p-8 overflow-hidden cursor-default
-        border border-[rgba(99,179,237,0.1)]
-        bg-[rgba(6,13,31,0.6)] backdrop-blur-xl
-        hover:border-[rgba(56,189,248,0.22)]
-        hover:bg-[rgba(6,13,31,0.85)]
-        hover:-translate-y-1
-        hover:shadow-[0_0_0_1px_rgba(56,189,248,0.05)_inset,0_20px_60px_rgba(0,0,0,0.4),0_0_40px_rgba(56,189,248,0.07)]
-        transition-all duration-300"
-    >
-      <span className="
-        absolute -top-2 right-4 select-none pointer-events-none
-        font-display font-extrabold text-[8rem] leading-none
-        text-[rgba(56,189,248,0.03)]
-        group-hover:text-[rgba(56,189,248,0.06)]
-        transition-colors duration-300
-      ">
-        {domain.letter}
-      </span>
-
-      {/* ── Card icon ── */}
-      <div className="
-        relative w-10 h-10 rounded-[10px] mb-5
-        flex items-center justify-center
-        border border-[rgba(56,189,248,0.2)]
-        bg-[rgba(56,189,248,0.07)]
-        text-[18px]
-      ">
-        {domain.icon}
+    <div ref={wrap} data-cursor className="relative mx-auto aspect-square w-full max-w-[560px] cursor-grab touch-pan-y select-none active:cursor-grabbing">
+      {/* gyroscope rings */}
+      <div className="pointer-events-none absolute inset-[14%]" style={{ perspective: 900 }}>
+        <div className="gyro absolute inset-0">
+          <div className="absolute inset-0 rounded-full border border-[rgba(94,231,255,0.18)]" />
+          <div className="absolute inset-0 rounded-full border border-[rgba(94,231,255,0.12)]" style={{ transform: 'rotateY(60deg)' }} />
+          <div className="absolute inset-0 rounded-full border border-[rgba(255,138,76,0.18)]" style={{ transform: 'rotateY(120deg)' }} />
+          <div className="absolute inset-0 rounded-full border border-[rgba(94,231,255,0.1)]" style={{ transform: 'rotateX(90deg)' }} />
+        </div>
       </div>
+      <div className="pointer-events-none absolute inset-[30%] rounded-full bg-[radial-gradient(circle,rgba(94,231,255,0.18),transparent_70%)] blur-2xl" />
 
-      <h3 className="font-display font-bold text-[1.05rem] tracking-[-0.01em] text-[#e2eaf4] mb-1">
-        {domain.title}
-      </h3>
-      <p className="font-mono text-[10px] text-[#3d5a7a] tracking-[0.1em] uppercase mb-6">
-        {domain.sub}
-      </p>
-
-      <div className="h-px bg-gradient-to-r from-[rgba(56,189,248,0.12)] to-transparent mb-6" />
-
-      <div className="flex flex-wrap gap-2">
-        {domain.skills.map((skill) => (
-          <SkillPill key={skill.name} skill={skill} />
+      <div className="absolute left-1/2 top-1/2">
+        {ALL.map((s, i) => (
+          <span
+            key={s.name}
+            ref={(n) => { items.current[i] = n }}
+            className="absolute left-0 top-0 whitespace-nowrap rounded-full border border-[var(--line-bright)] bg-[rgba(5,11,23,0.75)] px-3 py-1 font-mono text-[11px] text-ink backdrop-blur-sm md:text-[12.5px]"
+          >
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: s.color }} />
+            {s.name}
+          </span>
         ))}
       </div>
     </div>
   )
 }
 
-// Section
 export default function Skills() {
   return (
-    <section id="skills" className="relative py-12 md:py-24 overflow-hidden">
+    <section id="skills" className="relative overflow-hidden py-20 md:py-32">
+      <div className="pointer-events-none absolute right-0 top-1/2 h-[700px] w-[700px] -translate-y-1/2 translate-x-1/3 rounded-full bg-[radial-gradient(circle,rgba(43,183,224,0.08),transparent_65%)]" />
 
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
-      />
+      <div className="container-wide relative">
+        <SectionLabel index="03">Instruments</SectionLabel>
 
-      <div className="
-        absolute top-1/2 right-0 -translate-y-1/2
-        w-[600px] h-[600px] rounded-full pointer-events-none
-        bg-[radial-gradient(ellipse,rgba(129,140,248,0.05)_0%,transparent_70%)]
-      " />
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
+          <div>
+            <RevealLines
+              className="font-display text-[clamp(2.5rem,6vw,5.5rem)] font-bold leading-[0.92] tracking-[-0.045em] text-ink"
+              lines={['The tools', <span key="t" className="font-serif font-normal italic text-sonar">on my bridge</span>]}
+            />
+            <p className="mt-6 max-w-[420px] text-mist">
+              A stack chosen for speed, reliability and craft. Grab the sphere and spin it.
+            </p>
 
-      <div className="container-wide relative z-10">
+            <div className="mt-12 space-y-8">
+              {SKILL_DOMAINS.map((d, i) => (
+                <motion.div
+                  key={d.code}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.9, delay: i * 0.1, ease: EASE_OUT }}
+                  className="border-t border-[var(--line)] pt-5"
+                >
+                  <div className="mb-3 flex items-baseline justify-between">
+                    <h3 className="font-display text-lg font-semibold text-ink">{d.title}</h3>
+                    <span className="font-mono text-[10px] tracking-[0.2em] text-fog">{d.code} · {String(d.skills.length).padStart(2, '0')}</span>
+                  </div>
+                  <p className="text-[14px] leading-[1.9] text-mist">
+                    {d.skills.map(([name], j) => (
+                      <span key={name}>
+                        <span className="transition-colors hover:text-ink">{name}</span>
+                        {j < d.skills.length - 1 && <span className="mx-2 text-fog">/</span>}
+                      </span>
+                    ))}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
 
-        <div className="flex items-center gap-3 mb-6 md:mb-14">
-          <div className="w-8 h-px bg-gradient-to-r from-[#38bdf8] to-transparent" />
-          <span className="font-mono text-[11px] text-[#38bdf8] tracking-[0.15em] uppercase">
-            Skills
-          </span>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.7, rotate: -20 }}
+            whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 1.6, ease: EASE_OUT }}
+          >
+            <TagSphere />
+          </motion.div>
         </div>
-
-        <h2 className="
-          font-display font-bold leading-[1.15] tracking-[-0.02em]
-          text-[clamp(2rem,3.5vw,2.75rem)] text-[#e2eaf4]
-          mb-16
-        ">
-          Technologies
-          <br />
-          <span className="text-gradient">I Work With</span>
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {DOMAINS.map((domain, i) => (
-            <SkillCard key={domain.title} domain={domain} index={i} />
-          ))}
-        </div>
-
       </div>
     </section>
   )
