@@ -114,7 +114,7 @@ export default function Skills() {
     <section id="skills" className="py-24 md:py-36">
       <div className="container-wide grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-6">
-          <SectionTitle lines={['The stack', 'I work with']} count={ALL.length} />
+          <SectionTitle lines={['The stack', 'I work with']} />
           <div className="mt-12">
             {SKILL_DOMAINS.map((d, i) => (
               <FadeUp key={d.code} delay={i * 0.08} y={16} className="border-t border-[var(--line)] py-5">

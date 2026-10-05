@@ -94,7 +94,7 @@ export default function Projects() {
     <section id="work" className="pt-12 md:pt-20">
       <div className="container-wide">
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-12 lg:gap-16">
-          <SectionTitle lines={['Things I have', 'designed and built']} count={PROJECTS.length} className="lg:col-span-7" />
+          <SectionTitle lines={['Things I have', 'designed and built']} className="lg:col-span-7" />
           <FadeUp delay={0.1} className="lg:col-span-5">
             <p className="max-w-[40ch] text-mist lg:ml-auto">
               Apps, online shops, websites and brands, for clients and for myself. Scroll through the stack.
