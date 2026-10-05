@@ -13,30 +13,55 @@ interface FormData {
   message: string
 }
 
+const TOPICS = ['Website', 'E-shop', 'iOS app', 'Brand & design', 'Something else']
+const MAX_MESSAGE = 2000
+
 function Field({
   label,
   name,
   type = 'text',
   value,
+  placeholder,
   onChange,
   multiline = false,
 }: {
-  label:      string
-  name:       keyof FormData
-  type?:      string
-  value:      string
-  onChange:   (name: keyof FormData, value: string) => void
-  multiline?: boolean
+  label:       string
+  name:        keyof FormData
+  type?:       string
+  value:       string
+  placeholder: string
+  onChange:    (name: keyof FormData, value: string) => void
+  multiline?:  boolean
 }) {
-  const cls =
-    'w-full border-0 border-b border-[var(--line-bright)] bg-transparent px-0 py-2.5 text-[16px] text-ink outline-none transition-colors focus:border-ink'
+  const input =
+    'w-full bg-transparent text-[16px] text-ink outline-none placeholder:text-fog/70'
   return (
-    <label className="block">
-      <span className="text-[14px] text-fog">{label}</span>
+    <label className="group block rounded-xl border border-[var(--line)] bg-[rgba(236,239,242,0.025)] px-4 pb-3 pt-2.5 transition-[border-color,box-shadow,background-color] duration-300 [&:not(:focus-within):hover]:border-[var(--line-bright)] focus-within:border-[rgba(127,216,236,0.6)] focus-within:bg-[rgba(127,216,236,0.04)] focus-within:shadow-[0_0_0_4px_rgba(127,216,236,0.08),0_0_24px_rgba(127,216,236,0.12)]">
+      <span className="flex items-center justify-between text-[13px] text-mist transition-colors group-focus-within:text-sonar">
+        {label}
+        {multiline && <span className="tabular-nums text-fog">{value.length} / {MAX_MESSAGE}</span>}
+      </span>
       {multiline ? (
-        <textarea name={name} value={value} required rows={4} onChange={(e) => onChange(name, e.target.value)} className={`${cls} resize-none`} />
+        <textarea
+          name={name}
+          value={value}
+          required
+          rows={5}
+          maxLength={MAX_MESSAGE}
+          placeholder={placeholder}
+          onChange={(e) => onChange(name, e.target.value)}
+          className={`${input} mt-1 resize-none leading-relaxed`}
+        />
       ) : (
-        <input type={type} name={name} value={value} required onChange={(e) => onChange(name, e.target.value)} className={cls} />
+        <input
+          type={type}
+          name={name}
+          value={value}
+          required
+          placeholder={placeholder}
+          onChange={(e) => onChange(name, e.target.value)}
+          className={`${input} mt-1`}
+        />
       )}
     </label>
   )
@@ -55,7 +80,10 @@ export default function Contact() {
       const res = await fetch('/api/contact', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(form),
+        body:    JSON.stringify({
+          ...form,
+          subject: form.subject ? `${form.subject} inquiry from ${form.name}` : `New inquiry from ${form.name}`,
+        }),
       })
       if (!res.ok) throw new Error('Failed')
       setState('success')
@@ -72,7 +100,7 @@ export default function Contact() {
           <SectionTitle lines={['Have a project', 'in mind?']} />
           <FadeUp delay={0.1}>
             <p className="mt-8 max-w-[36ch] text-mist">
-              Website, e-shop, app or a brand from scratch. Tell me what you are working on and I will reply within a day.
+              Website, e-shop, app or a brand from scratch. Tell me a bit about it, or email me directly.
             </p>
             <a href={`mailto:${EMAIL}`} className="group mt-8 inline-flex items-center gap-2 text-[clamp(1.05rem,1.6vw,1.3rem)] text-ink">
               <span className="link-line">{EMAIL}</span>
@@ -103,6 +131,9 @@ export default function Contact() {
                   transition={{ duration: 0.5, ease: EASE_OUT }}
                   className="relative py-10"
                 >
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-sonar text-sonar shadow-[0_0_24px_rgba(127,216,236,0.3)]">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5L20 7" /></svg>
+                  </div>
                   <p className="font-display text-2xl font-semibold text-ink">Thanks, message sent.</p>
                   <p className="mt-2 text-mist">I&apos;ll get back to you soon.</p>
                   <button onClick={() => setState('idle')} className="link-line mt-6 text-[14px] text-mist hover:text-ink">
@@ -110,25 +141,78 @@ export default function Contact() {
                   </button>
                 </motion.div>
               ) : (
-                <motion.form key="form" onSubmit={handleSubmit} exit={{ opacity: 0 }} className="relative flex flex-col gap-8">
-                  <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-                    <Field label="Name" name="name" value={form.name} onChange={handleChange} />
-                    <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
+                <motion.form key="form" onSubmit={handleSubmit} exit={{ opacity: 0 }} className="relative flex flex-col gap-5">
+                  <fieldset>
+                    <legend className="mb-3 text-[13px] text-mist">What are you working on?</legend>
+                    <div className="flex flex-wrap gap-2">
+                      {TOPICS.map((t) => {
+                        const on = form.subject === t
+                        return (
+                          <button
+                            key={t}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => handleChange('subject', on ? '' : t)}
+                            className={`rounded-full border px-4 py-2 text-[14px] transition-all duration-300 active:scale-[0.97] ${
+                              on
+                                ? 'border-sonar bg-[rgba(127,216,236,0.12)] text-ink shadow-[0_0_18px_rgba(127,216,236,0.25)]'
+                                : 'border-[var(--line)] text-mist hover:border-[var(--line-bright)] hover:text-ink'
+                            }`}
+                          >
+                            {t}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </fieldset>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="Name" name="name" placeholder="Jana Nováková" value={form.name} onChange={handleChange} />
+                    <Field label="Email" name="email" type="email" placeholder="jana@company.sk" value={form.email} onChange={handleChange} />
                   </div>
-                  <Field label="Subject" name="subject" value={form.subject} onChange={handleChange} />
-                  <Field label="Message" name="message" value={form.message} onChange={handleChange} multiline />
+                  <Field
+                    label="Message"
+                    name="message"
+                    placeholder="A few lines about the project, timeline and anything I should know."
+                    value={form.message}
+                    onChange={handleChange}
+                    multiline
+                  />
 
                   {state === 'error' && (
-                    <p className="text-[14px] text-red-400">Something went wrong. Please email me directly.</p>
+                    <p className="rounded-xl border border-[rgba(229,72,77,0.35)] bg-[rgba(229,72,77,0.08)] px-4 py-3 text-[14px] text-red-300">
+                      Something went wrong. Please email me directly at {EMAIL}.
+                    </p>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={state === 'loading'}
-                    className="w-fit rounded-full bg-ink px-7 py-3.5 text-[15px] font-medium text-void transition-[box-shadow,transform] duration-500 hover:shadow-[0_0_30px_rgba(127,216,236,0.45)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {state === 'loading' ? 'Sending…' : 'Send message'}
-                  </button>
+                  <div className="mt-2 flex flex-col-reverse items-start justify-between gap-4 sm:flex-row sm:items-center">
+                    <p className="flex items-center gap-2 text-[14px] text-fog">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#30a46c] shadow-[0_0_8px_rgba(48,164,108,0.8)]" />
+                      Usually replies within a day
+                    </p>
+                    <button
+                      type="submit"
+                      disabled={state === 'loading'}
+                      className="group inline-flex items-center gap-2.5 rounded-full bg-ink px-6 py-3.5 text-[15px] font-medium text-void transition-[box-shadow,transform] duration-500 hover:shadow-[0_0_30px_rgba(127,216,236,0.45)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {state === 'loading' ? (
+                        <>
+                          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2.5" />
+                            <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                          </svg>
+                          Sending
+                        </>
+                      ) : (
+                        <>
+                          Send message
+                          <svg className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                            <path d="M3 8h10M9 4l4 4-4 4" />
+                          </svg>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </motion.form>
               )}
             </AnimatePresence>
