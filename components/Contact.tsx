@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { EMAIL } from '@/lib/data'
-import { ArrowUpRight, EASE_OUT, FadeUp, RevealLines, SectionHead } from './fx/primitives'
+import { EMAIL, SOCIALS } from '@/lib/data'
+import { ArrowUpRight, EASE_OUT, FadeUp, SectionTitle } from './fx/primitives'
 
 type FormState = 'idle' | 'loading' | 'success' | 'error'
 
@@ -67,21 +67,32 @@ export default function Contact() {
 
   return (
     <section id="contact" className="py-24 md:py-36">
-      <div className="container-wide">
-        <SectionHead label="Contact">
-          <RevealLines
-            className="font-display text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-[1] tracking-[-0.04em] text-ink"
-            lines={['Have a project', 'in mind?']}
-          />
+      <div className="container-wide grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-5">
+          <SectionTitle label="Contact" lines={['Have a project', 'in mind?']} />
           <FadeUp delay={0.1}>
-            <a href={`mailto:${EMAIL}`} className="group mt-8 inline-flex items-center gap-2 text-[clamp(1.1rem,2vw,1.5rem)] text-ink">
+            <p className="mt-8 max-w-[36ch] text-mist">
+              Website, e-shop, app or a brand from scratch. Tell me what you are working on and I will reply within a day.
+            </p>
+            <a href={`mailto:${EMAIL}`} className="group mt-8 inline-flex items-center gap-2 text-[clamp(1.05rem,1.6vw,1.3rem)] text-ink">
               <span className="link-line">{EMAIL}</span>
               <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </a>
-            <p className="mt-3 text-mist">Or use the form below. I usually reply within a day.</p>
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[15px] text-mist">
+              {SOCIALS.map((s) => (
+                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="link-line transition-colors hover:text-ink">
+                  {s.label}
+                </a>
+              ))}
+            </div>
           </FadeUp>
+        </div>
 
-          <FadeUp delay={0.15} className="mt-16 max-w-[640px]">
+        <FadeUp delay={0.15} className="lg:col-span-7">
+          <div className="relative overflow-hidden rounded-2xl border border-[var(--line)] bg-abyss p-7 md:p-10">
+            {/* faint light along the top edge of the panel */}
+            <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-sonar to-transparent opacity-60" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(127,216,236,0.08),transparent)]" />
             <AnimatePresence mode="wait">
               {state === 'success' ? (
                 <motion.div
@@ -90,7 +101,7 @@ export default function Contact() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5, ease: EASE_OUT }}
-                  className="border-t border-[var(--line)] py-10"
+                  className="relative py-10"
                 >
                   <p className="font-display text-2xl font-semibold text-ink">Thanks, message sent.</p>
                   <p className="mt-2 text-mist">I&apos;ll get back to you soon.</p>
@@ -99,7 +110,7 @@ export default function Contact() {
                   </button>
                 </motion.div>
               ) : (
-                <motion.form key="form" onSubmit={handleSubmit} exit={{ opacity: 0 }} className="flex flex-col gap-8">
+                <motion.form key="form" onSubmit={handleSubmit} exit={{ opacity: 0 }} className="relative flex flex-col gap-8">
                   <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                     <Field label="Name" name="name" value={form.name} onChange={handleChange} />
                     <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
@@ -114,15 +125,15 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={state === 'loading'}
-                    className="w-fit rounded-full bg-ink px-7 py-3.5 text-[15px] font-medium text-void transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="w-fit rounded-full bg-ink px-7 py-3.5 text-[15px] font-medium text-void transition-[box-shadow,transform] duration-500 hover:shadow-[0_0_30px_rgba(127,216,236,0.45)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {state === 'loading' ? 'Sending…' : 'Send message'}
                   </button>
                 </motion.form>
               )}
             </AnimatePresence>
-          </FadeUp>
-        </SectionHead>
+          </div>
+        </FadeUp>
       </div>
     </section>
   )

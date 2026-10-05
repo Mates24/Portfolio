@@ -41,7 +41,7 @@ const DEEP  = new THREE.Color('#123a6b')
 const FLARE = new THREE.Color('#ff8a4c')
 
 /* ── Particle ocean ─────────────────────────────────────────── */
-function Ocean({ dense, speed }: { dense: boolean; speed: number }) {
+function Ocean({ dense, speed, moonX }: { dense: boolean; speed: number; moonX: number }) {
   const mat = useRef<THREE.ShaderMaterial>(null)
   const geometry = useMemo(() => {
     const cols = dense ? 190 : 110
@@ -72,8 +72,9 @@ function Ocean({ dense, speed }: { dense: boolean; speed: number }) {
     uPR:    { value: 1 },
     uDeep:  { value: DEEP },
     uSonar: { value: SONAR },
-    uFlare: { value: FLARE },
-  }), [dense])
+    uMoon:  { value: new THREE.Color('#dcecff') },
+    uMoonX: { value: moonX },
+  }), [dense, moonX])
 
   useFrame((state, dt) => {
     if (!mat.current) return
@@ -106,7 +107,7 @@ function Ocean({ dense, speed }: { dense: boolean; speed: number }) {
           }
         `}
         fragmentShader={/* glsl */ `
-          uniform vec3 uDeep; uniform vec3 uSonar; uniform vec3 uFlare; uniform float uTime;
+          uniform vec3 uDeep; uniform vec3 uSonar; uniform vec3 uMoon; uniform float uMoonX; uniform float uTime;
           varying float vH; varying float vDist; varying float vRnd; varying float vX;
           void main() {
             float d = length(gl_PointCoord - 0.5);
@@ -114,13 +115,14 @@ function Ocean({ dense, speed }: { dense: boolean; speed: number }) {
             float core = smoothstep(0.5, 0.0, d);
             float crest = smoothstep(-0.2, 0.75, vH);
             vec3 col = mix(uDeep, uSonar, crest);
-            // a warm sunset streak far out on the horizon
-            float streak = exp(-pow(vX * 0.09, 2.0)) * smoothstep(18.0, 50.0, vDist);
-            col = mix(col, uFlare, streak * 0.75 * crest);
+            // moonlight path on the water, widening toward the viewer
+            float width = mix(1.5, 6.0, 1.0 - smoothstep(10.0, 55.0, vDist));
+            float streak = exp(-pow((vX - uMoonX * smoothstep(5.0, 55.0, vDist)) / width, 2.0));
+            col = mix(col, uMoon, streak * 0.8 * crest);
             float twinkle = 0.75 + 0.25 * sin(uTime * 3.0 + vRnd * 40.0);
             float fog = 1.0 - smoothstep(26.0, 62.0, vDist);
             float nearFade = smoothstep(3.0, 9.5, vDist);
-            gl_FragColor = vec4(col * 1.25, core * fog * nearFade * (0.45 + crest * 0.85) * twinkle);
+            gl_FragColor = vec4(col * 1.2, core * fog * nearFade * (0.4 + crest * 0.8 + streak * 0.5) * twinkle);
           }
         `}
       />
@@ -231,8 +233,10 @@ function makeHull(widthSeg: number, heightSeg: number) {
 }
 
 /* ── Holographic sailboat ───────────────────────────────────── */
+const YAW = -0.95       // heading, radians
+const FREEBOARD = 0.14  // deck height above the mean surface under the hull
+const HEEL = 0.05       // slight lean from the wind
 function Sailboat({ position, speed, scale = 1 }: { position: [number, number, number]; speed: number; scale?: number }) {
-  const group = useRef<THREE.Group>(null)
   const time  = useRef(0)
 
   const hullMat = useHologram(SONAR, 1)
@@ -259,24 +263,42 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
     return { hull, hullWire, main, jib, mainLine, jibLine, deck, flag }
   }, [])
 
+  const float = useRef<THREE.Group>(null)
+  const hull  = useRef<THREE.Group>(null)
+  const pose  = useRef({ y: 0, pitch: 0, roll: 0 })
+
   useFrame((_, dt) => {
     time.current += dt * speed
     const t = time.current
     ;[hullMat, sailMat, flagMat].forEach((m) => (m.uniforms.uTime.value = t))
-    if (!group.current) return
+    if (!float.current || !hull.current) return
+
+    // Sample the swell under bow, stern and both sides along the boat's own axes,
+    // so it pitches and rolls like a hull resting on the water.
     const [x, , z] = position
-    const h  = wave(x, z, t)
-    const hx = wave(x + 0.6, z, t) - wave(x - 0.6, z, t)
-    const hz = wave(x, z + 0.6, t) - wave(x, z - 0.6, t)
-    group.current.position.y = position[1] + h * 0.9
-    group.current.rotation.z = -hx * 0.4 + 0.06 // heel
-    group.current.rotation.x = hz * 0.5
+    const fx = Math.sin(YAW), fz = Math.cos(YAW)   // forward
+    const sx = Math.cos(YAW), sz = -Math.sin(YAW)  // starboard (+x local)
+    const L = 1.9 * scale, B = 0.6 * scale
+    const bow   = wave(x + fx * L, z + fz * L, t)
+    const stern = wave(x - fx * L, z - fz * L, t)
+    const right = wave(x + sx * B, z + sz * B, t)
+    const left  = wave(x - sx * B, z - sz * B, t)
+    const mid   = wave(x, z, t)
+
+    const k = 1 - Math.exp(-dt * 2.5)
+    const p = pose.current
+    p.y     += ((bow + stern + right + left + mid) / 5 + FREEBOARD - p.y) * k
+    p.pitch += (-Math.atan2(bow - stern, 2 * L) - p.pitch) * k
+    p.roll  += (Math.atan2(right - left, 2 * B) * 0.5 + HEEL - p.roll) * k
+
+    float.current.position.y = p.y / scale // parent group is scaled; wave heights are world units
+    hull.current.rotation.set(p.pitch, YAW, p.roll, 'YXZ')
   })
 
   return (
-    <group position={position} scale={scale}>
-      <group ref={group}>
-        <group rotation={[0, -0.95, 0]}>
+    <group position={[position[0], 0, position[2]]} scale={scale}>
+      <group ref={float}>
+        <group ref={hull} rotation={[0, YAW, 0]}>
           <mesh geometry={geo.hull} material={hullMat} />
           <lineSegments geometry={geo.hullWire}>
             <lineBasicMaterial color="#5ee7ff" transparent opacity={0.18} blending={THREE.AdditiveBlending} depthWrite={false} />
@@ -302,9 +324,8 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
           <mesh geometry={geo.flag} material={flagMat} />
           <pointLight position={[0, 3.9, 0.25]} color="#ff8a4c" intensity={2} distance={3} />
         </group>
-      </group>
-      {/* glow halo on the water */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+        {/* glow halo on the water */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -FREEBOARD - 0.02, 0]}>
         <circleGeometry args={[2.6, 48]} />
         <shaderMaterial
           transparent
@@ -312,6 +333,29 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
           blending={THREE.AdditiveBlending}
           vertexShader={`varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`}
           fragmentShader={`varying vec2 vUv; void main(){ float d = length(vUv - 0.5) * 2.0; gl_FragColor = vec4(0.37, 0.9, 1.0, pow(1.0 - d, 3.0) * 0.18); }`}
+        />
+      </mesh>
+      </group>
+    </group>
+  )
+}
+
+/* ── Moon with a soft halo ──────────────────────────────────── */
+function Moon({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      <mesh>
+        <circleGeometry args={[1.5, 48]} />
+        <meshBasicMaterial color="#eef5ff" toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 0, -0.1]}>
+        <planeGeometry args={[26, 26]} />
+        <shaderMaterial
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          vertexShader={`varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`}
+          fragmentShader={`varying vec2 vUv; void main(){ float d = length(vUv - 0.5) * 2.0; float a = pow(max(1.0 - d, 0.0), 4.0) * 0.55; gl_FragColor = vec4(0.72, 0.86, 1.0, a); }`}
         />
       </mesh>
     </group>
@@ -360,7 +404,8 @@ export default function OceanScene({ active }: { active: boolean }) {
       camera={{ position: [0, 2.1, 9.5], fov: isMobile ? 62 : 48, near: 0.1, far: 200 }}
     >
       <Stars count={isMobile ? 500 : 900} />
-      <Ocean dense={!isMobile} speed={speed} />
+      <Moon position={isMobile ? [-3, 13, -46] : [-13, 9.5, -46]} />
+      <Ocean dense={!isMobile} speed={speed} moonX={isMobile ? -3 : -13} />
       <Sailboat position={isMobile ? [0.9, 0.15, -3.5] : [4.2, 0.15, -1.2]} scale={isMobile ? 0.8 : 0.82} speed={speed} />
       <Rig pointer={pointer} mobile={isMobile} />
     </Canvas>

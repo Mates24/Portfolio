@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { SKILL_DOMAINS } from '@/lib/data'
-import { EASE_OUT, FadeUp, SectionHead } from './fx/primitives'
+import { EASE_OUT, FadeUp, SectionTitle } from './fx/primitives'
 
 const ALL = SKILL_DOMAINS.flatMap((d) => d.skills.map(([name]) => ({ name })))
 
@@ -112,33 +112,30 @@ function TagSphere() {
 export default function Skills() {
   return (
     <section id="skills" className="py-24 md:py-36">
-      <div className="container-wide">
-        <SectionHead label="Tools">
-          <p className="max-w-[40ch] text-mist">
-            What I use day to day. The sphere spins if you drag it.
-          </p>
-        </SectionHead>
-
-        <div className="mt-12 grid grid-cols-1 items-center gap-12 md:grid-cols-12 md:gap-6">
-          <div className="md:col-span-5 md:col-start-4">
+      <div className="container-wide grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-6">
+          <SectionTitle label="Tools" lines={['The stack', 'I work with']} />
+          <div className="mt-12">
             {SKILL_DOMAINS.map((d, i) => (
               <FadeUp key={d.code} delay={i * 0.08} y={16} className="border-t border-[var(--line)] py-5">
-                <h3 className="mb-2 text-[15px] text-ink">{d.title}</h3>
-                <p className="text-[15px] leading-relaxed text-mist">{d.skills.map(([name]) => name).join(', ')}</p>
+                <h3 className="mb-1.5 text-ink">{d.title}</h3>
+                <p className="leading-relaxed text-mist">{d.skills.map(([name]) => name).join(', ')}</p>
               </FadeUp>
             ))}
           </div>
-
-          <motion.div
-            className="md:col-span-4"
-            initial={{ opacity: 0, scale: 0.85 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 1.4, ease: EASE_OUT }}
-          >
-            <TagSphere />
-          </motion.div>
         </div>
+
+        <motion.div
+          className="relative lg:col-span-6"
+          initial={{ opacity: 0, scale: 0.85 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 1.4, ease: EASE_OUT }}
+        >
+          <div className="pointer-events-none absolute inset-[22%] rounded-full bg-[radial-gradient(closest-side,rgba(127,216,236,0.14),transparent)]" />
+          <TagSphere />
+          <p className="mt-2 text-center text-[14px] text-fog">Drag to spin</p>
+        </motion.div>
       </div>
     </section>
   )

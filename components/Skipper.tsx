@@ -48,7 +48,7 @@ function Chapter({ i, progress, chapter }: { i: number; progress: MotionValue<nu
   const pointerEvents = useTransform(opacity, (o) => (o > 0.5 ? 'auto' : 'none'))
   return (
     <motion.div style={{ opacity, y, pointerEvents }} className="absolute inset-0 flex flex-col justify-center">
-      <p className="mb-4 text-[14px] text-fog">{i + 1} of {CHAPTERS.length}</p>
+      <p className="mb-4 text-[14px] text-fog">{i + 1} / {CHAPTERS.length}</p>
       <h3 className="max-w-[16ch] font-display text-[clamp(1.9rem,3.8vw,3.4rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-ink">
         {chapter.title}
       </h3>
@@ -113,12 +113,13 @@ function Chart({ progress }: { progress: MotionValue<number> }) {
         ))}
 
         <path d={ROUTE} fill="none" stroke="rgba(236,239,242,0.2)" strokeWidth="1.5" strokeDasharray="5 7" />
-        <motion.path ref={pathRef} d={ROUTE} fill="none" stroke="#ff8a4c" strokeWidth="2" strokeLinecap="round" style={{ pathLength: routeT }} />
+        <motion.path ref={pathRef} d={ROUTE} fill="none" stroke="#ff8a4c" strokeWidth="2" strokeLinecap="round" style={{ pathLength: routeT, filter: 'drop-shadow(0 0 6px rgba(255,138,76,0.7))' }} />
 
         {WAYPOINTS.map((w) => <Waypoint key={w.t} wp={w} routeT={routeT} />)}
 
         <g ref={boatRef} transform="translate(110 630)">
-          <path d="M0 -13 L7 9 L0 5 L-7 9 Z" fill="#ff8a4c" />
+          <circle r="16" fill="rgba(255,138,76,0.18)" />
+          <path d="M0 -13 L7 9 L0 5 L-7 9 Z" fill="#ff8a4c" style={{ filter: 'drop-shadow(0 0 5px rgba(255,138,76,0.9))' }} />
         </g>
       </svg>
 
@@ -143,16 +144,17 @@ export default function Skipper() {
     <section id="skipper" ref={ref} className="relative h-[320vh]">
       <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden pb-6 pt-20 md:pb-10 md:pt-24">
         <div className="container-wide flex min-h-0 flex-1 flex-col">
-          <div className="grid grid-cols-1 border-t border-[var(--line)] pt-6 md:grid-cols-12">
-            <p className="text-[14px] text-mist md:col-span-3">Sailing</p>
-          </div>
-          <div className="mt-6 grid min-h-0 flex-1 grid-rows-[minmax(0,0.85fr)_minmax(0,1.15fr)] gap-6 md:grid-cols-12 md:grid-rows-1">
-            <div className="relative md:col-span-4 md:col-start-4 md:pr-6">
+          <p className="flex items-center gap-2.5 text-[14px] text-mist">
+            <span className="h-1.5 w-1.5 rounded-full bg-flare shadow-[0_0_10px_2px_rgba(255,138,76,0.55)]" />
+            Sailing
+          </p>
+          <div className="mt-6 grid min-h-0 flex-1 grid-rows-[minmax(0,0.85fr)_minmax(0,1.15fr)] gap-6 lg:grid-cols-12 lg:grid-rows-1 lg:gap-16">
+            <div className="relative lg:col-span-5">
               {CHAPTERS.map((c, i) => (
                 <Chapter key={i} i={i} progress={progress} chapter={c} />
               ))}
             </div>
-            <div className="md:col-span-5">
+            <div className="lg:col-span-7">
               <Chart progress={progress} />
             </div>
           </div>

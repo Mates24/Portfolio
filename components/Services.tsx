@@ -1,5 +1,5 @@
 'use client'
-import { FadeUp, SectionHead } from './fx/primitives'
+import { FadeUp, SectionTitle } from './fx/primitives'
 
 const SERVICES = [
   {
@@ -21,25 +21,35 @@ const SERVICES = [
 
 export default function Services() {
   return (
-    <section className="pb-24 md:pb-36">
-      <div className="container-wide">
-        <SectionHead label="What I do">
-          <div>
-            {SERVICES.map((s, i) => (
-              <FadeUp key={s.title} delay={i * 0.06} y={16}>
-                <div className={`group grid grid-cols-1 gap-3 py-7 md:grid-cols-9 md:gap-6 ${i > 0 ? 'border-t border-[var(--line)]' : 'pt-0'}`}>
-                  <h3 className="font-display text-[clamp(1.5rem,2.6vw,2.25rem)] font-medium leading-tight tracking-[-0.02em] text-ink transition-transform duration-500 ease-[var(--ease-out)] md:col-span-4 md:group-hover:translate-x-2">
-                    {s.title}
-                  </h3>
-                  <div className="md:col-span-5">
-                    <p className="text-mist">{s.desc}</p>
-                    <p className="mt-2 text-[14px] text-fog">{s.stack}</p>
-                  </div>
-                </div>
-              </FadeUp>
-            ))}
+    <section className="py-24 md:py-36">
+      <div className="container-wide grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-5">
+          <div className="lg:sticky lg:top-28">
+            <SectionTitle label="Services" lines={['What I can', 'do for you']} />
+            <FadeUp delay={0.1}>
+              <p className="mt-8 max-w-[36ch] text-mist">
+                One person across design and engineering, so nothing gets lost between the mockup and the
+                code.
+              </p>
+            </FadeUp>
           </div>
-        </SectionHead>
+        </div>
+
+        <div className="lg:col-span-7">
+          {SERVICES.map((s, i) => (
+            <FadeUp key={s.title} delay={i * 0.06} y={20}>
+              <div className={`group relative border-t border-[var(--line)] py-9 ${i === SERVICES.length - 1 ? 'border-b' : ''}`}>
+                {/* a thin glowing line that sweeps in on hover */}
+                <span className="absolute -top-px left-0 h-px w-full origin-left scale-x-0 bg-sonar shadow-[0_0_12px_rgba(127,216,236,0.8)] transition-transform duration-700 ease-[var(--ease-out)] group-hover:scale-x-100" />
+                <h3 className="font-display text-[clamp(1.6rem,2.8vw,2.4rem)] font-semibold leading-tight tracking-[-0.025em] text-ink">
+                  {s.title}
+                </h3>
+                <p className="mt-3 max-w-[48ch] text-mist">{s.desc}</p>
+                <p className="mt-3 text-[14px] text-fog">{s.stack}</p>
+              </div>
+            </FadeUp>
+          ))}
+        </div>
       </div>
     </section>
   )

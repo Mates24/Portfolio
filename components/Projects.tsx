@@ -3,7 +3,7 @@ import { useRef } from 'react'
 import Image from 'next/image'
 import { motion, useTransform, type MotionValue } from 'framer-motion'
 import { PROJECTS, type Project } from '@/lib/data'
-import { ArrowUpRight, SectionHead, useScrollProgress } from './fx/primitives'
+import { ArrowUpRight, FadeUp, SectionTitle, useScrollProgress } from './fx/primitives'
 
 function Card({
   project,
@@ -38,8 +38,8 @@ function Card({
         href={project.href}
         target="_blank"
         rel="noopener noreferrer"
-        style={{ scale, rotateX, top: `calc(${index * 14}px - 2vh)`, transformPerspective: 1400, transformOrigin: '50% 0%' }}
-        className="group relative grid h-[min(80svh,660px)] w-full grid-rows-[45%_1fr] overflow-hidden rounded-lg border border-[var(--line)] bg-abyss md:grid-cols-[1fr_1.3fr] md:grid-rows-1"
+        style={{ scale, rotateX, top: `calc(${index * 14}px - 2vh)`, transformPerspective: 1400, transformOrigin: '50% 0%', ['--glow' as string]: project.accent }}
+        className="group relative grid h-[min(80svh,660px)] w-full grid-rows-[45%_1fr] overflow-hidden rounded-2xl border border-[var(--line)] bg-abyss transition-[border-color,box-shadow] duration-700 hover:border-[rgba(var(--glow),0.45)] hover:shadow-[0_0_90px_-20px_rgba(var(--glow),0.45)] md:grid-cols-[1fr_1.3fr] md:grid-rows-1"
       >
         <div className="order-2 flex flex-col justify-between p-6 md:order-1 md:p-10">
           <p className="text-[14px] text-fog">{project.category}</p>
@@ -91,13 +91,16 @@ export default function Projects() {
   const progress = useScrollProgress({ target: stack, offset: ['start start', 'end end'] })
 
   return (
-    <section id="work" className="pt-12 md:pt-16">
+    <section id="work" className="pt-12 md:pt-20">
       <div className="container-wide">
-        <SectionHead label="Selected work">
-          <p className="max-w-[40ch] text-mist">
-            Apps, online shops, websites and brands I have designed and built for clients and for myself.
-          </p>
-        </SectionHead>
+        <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-12 lg:gap-16">
+          <SectionTitle label="Selected work" lines={['Things I have', 'designed and built']} className="lg:col-span-7" />
+          <FadeUp delay={0.1} className="lg:col-span-5">
+            <p className="max-w-[40ch] text-mist lg:ml-auto">
+              Apps, online shops, websites and brands, for clients and for myself. Scroll through the stack.
+            </p>
+          </FadeUp>
+        </div>
 
         <div ref={stack} className="relative">
           {PROJECTS.map((p, i) => (

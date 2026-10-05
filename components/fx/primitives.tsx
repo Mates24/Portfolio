@@ -22,12 +22,20 @@ export function useScrollProgress(options: Parameters<typeof useScroll>[0]) {
   return useTransform(scrollYProgress, (v) => v)
 }
 
-/* Rule + label column, the header used by every section. */
-export function SectionHead({ label, children }: { label: string; children?: ReactNode }) {
+/* Small label + large heading, used at the top of every section. */
+export function SectionTitle({ label, lines, className = '' }: { label: string; lines: ReactNode[]; className?: string }) {
   return (
-    <div className="grid grid-cols-1 gap-6 border-t border-[var(--line)] pt-6 md:grid-cols-12 md:gap-6">
-      <p className="text-[14px] text-mist md:col-span-3">{label}</p>
-      {children && <div className="md:col-span-9">{children}</div>}
+    <div className={className}>
+      <FadeUp y={10}>
+        <p className="mb-5 flex items-center gap-2.5 text-[14px] text-mist">
+          <span className="h-1.5 w-1.5 rounded-full bg-sonar shadow-[0_0_10px_2px_rgba(127,216,236,0.55)]" />
+          {label}
+        </p>
+      </FadeUp>
+      <RevealLines
+        className="font-display text-[clamp(2.4rem,5.2vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-ink"
+        lines={lines}
+      />
     </div>
   )
 }
@@ -42,22 +50,27 @@ export function RevealLines({
   className?: string
   delay?: number
 }) {
+  // The heading (not each line) is observed: a line translated fully below its
+  // overflow mask counts as invisible to IntersectionObserver and would never trigger.
   return (
-    <h2 className={className}>
+    <motion.h2
+      className={className}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ staggerChildren: 0.08, delayChildren: delay }}
+    >
       {lines.map((line, i) => (
         <span key={i} className="block overflow-hidden pb-[0.06em]">
           <motion.span
             className="block"
-            initial={{ y: '105%' }}
-            whileInView={{ y: '0%' }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 1, delay: delay + i * 0.08, ease: EASE_OUT }}
+            variants={{ hidden: { y: '105%' }, show: { y: '0%', transition: { duration: 1, ease: EASE_OUT } } }}
           >
             {line}
           </motion.span>
         </span>
       ))}
-    </h2>
+    </motion.h2>
   )
 }
 
