@@ -144,11 +144,7 @@ export default function Skipper() {
     <section id="skipper" ref={ref} className="relative h-[320vh]">
       <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden pb-6 pt-20 md:pb-10 md:pt-24">
         <div className="container-wide flex min-h-0 flex-1 flex-col">
-          <p className="flex items-center gap-2.5 text-[14px] text-mist">
-            <span className="h-1.5 w-1.5 rounded-full bg-flare shadow-[0_0_10px_2px_rgba(255,138,76,0.55)]" />
-            Sailing
-          </p>
-          <div className="mt-6 grid min-h-0 flex-1 grid-rows-[minmax(0,0.85fr)_minmax(0,1.15fr)] gap-6 lg:grid-cols-12 lg:grid-rows-1 lg:gap-16">
+          <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,0.85fr)_minmax(0,1.15fr)] gap-6 lg:grid-cols-12 lg:grid-rows-1 lg:gap-16">
             <div className="relative lg:col-span-5">
               {CHAPTERS.map((c, i) => (
                 <Chapter key={i} i={i} progress={progress} chapter={c} />

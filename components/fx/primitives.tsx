@@ -22,21 +22,26 @@ export function useScrollProgress(options: Parameters<typeof useScroll>[0]) {
   return useTransform(scrollYProgress, (v) => v)
 }
 
-/* Small label + large heading, used at the top of every section. */
-export function SectionTitle({ label, lines, className = '' }: { label: string; lines: ReactNode[]; className?: string }) {
+/* Section heading. An optional count sits as a small superscript after the last line, e.g. "(06)". */
+export function SectionTitle({ lines, count, className = '' }: { lines: ReactNode[]; count?: number; className?: string }) {
+  const last = lines.length - 1
+  const withCount = lines.map((line, i) =>
+    i === last && count !== undefined ? (
+      <span key={i}>
+        {line}
+        <sup className="ml-[0.15em] align-super text-[0.28em] font-normal tracking-normal text-mist">
+          ({String(count).padStart(2, '0')})
+        </sup>
+      </span>
+    ) : (
+      line
+    ),
+  )
   return (
-    <div className={className}>
-      <FadeUp y={10}>
-        <p className="mb-5 flex items-center gap-2.5 text-[14px] text-mist">
-          <span className="h-1.5 w-1.5 rounded-full bg-sonar shadow-[0_0_10px_2px_rgba(127,216,236,0.55)]" />
-          {label}
-        </p>
-      </FadeUp>
-      <RevealLines
-        className="font-display text-[clamp(2.4rem,5.2vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-ink"
-        lines={lines}
-      />
-    </div>
+    <RevealLines
+      className={`font-display text-[clamp(2.4rem,5.2vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-ink ${className}`}
+      lines={withCount}
+    />
   )
 }
 

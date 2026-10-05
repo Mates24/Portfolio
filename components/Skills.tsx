@@ -114,7 +114,7 @@ export default function Skills() {
     <section id="skills" className="py-24 md:py-36">
       <div className="container-wide grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-6">
-          <SectionTitle label="Tools" lines={['The stack', 'I work with']} />
+          <SectionTitle lines={['The stack', 'I work with']} count={ALL.length} />
           <div className="mt-12">
             {SKILL_DOMAINS.map((d, i) => (
               <FadeUp key={d.code} delay={i * 0.08} y={16} className="border-t border-[var(--line)] py-5">
@@ -134,7 +134,6 @@ export default function Skills() {
         >
           <div className="pointer-events-none absolute inset-[22%] rounded-full bg-[radial-gradient(closest-side,rgba(127,216,236,0.14),transparent)]" />
           <TagSphere />
-          <p className="mt-2 text-center text-[14px] text-fog">Drag to spin</p>
         </motion.div>
       </div>
     </section>

@@ -37,7 +37,7 @@ export default function About() {
         </motion.div>
 
         <div className="lg:col-span-7">
-          <SectionTitle label="About" lines={['Engineer and', 'designer.']} />
+          <SectionTitle lines={['Engineer and', 'designer.']} />
 
           <ScrollText
             className="mt-10 max-w-[38ch] text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] text-ink"

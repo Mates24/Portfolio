@@ -234,12 +234,12 @@ function makeHull(widthSeg: number, heightSeg: number) {
 
 /* ── Holographic sailboat ───────────────────────────────────── */
 const YAW = -0.95       // heading, radians
-const FREEBOARD = 0.14  // deck height above the mean surface under the hull
+const FREEBOARD = 0.32  // deck height above the mean surface under the hull
 const HEEL = 0.05       // slight lean from the wind
 function Sailboat({ position, speed, scale = 1 }: { position: [number, number, number]; speed: number; scale?: number }) {
   const time  = useRef(0)
 
-  const hullMat = useHologram(SONAR, 1)
+  const hullMat = useHologram(SONAR, 1.35)
   const sailMat = useHologram(new THREE.Color('#bff4ff'), 0.9)
   const flagMat = useHologram(FLARE, 1.2)
 
@@ -252,7 +252,16 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
       new THREE.BufferGeometry().setFromPoints(pts.map((v) => new THREE.Vector3(...(v as [number, number, number]))))
     const mainEdge = outline([[0.05, 0.5, 0.25], [0.05, 3.6, 0.25], [0.12, 0.55, -1.75], [0.05, 0.5, 0.25]])
     const jibEdge  = outline([[0.03, 0.3, 2.05], [0.03, 3.25, 0.32], [0.08, 0.5, 0.55], [0.03, 0.3, 2.05]])
-    const deck = new THREE.EdgesGeometry(new THREE.CircleGeometry(1, 40).scale(0.62, 2.1, 1).rotateX(-Math.PI / 2))
+    const deckCap = new THREE.CircleGeometry(1, 40).scale(0.61, 2.08, 1).rotateX(-Math.PI / 2)
+    // match the hull's pinched bow so the cap doesn't poke out past the outline
+    const dp = deckCap.attributes.position as THREE.BufferAttribute
+    for (let i = 0; i < dp.count; i++) {
+      const zn = dp.getZ(i) / 2.08
+      const bow = Math.max(zn, 0)
+      const stern = zn < 0 ? 1 - Math.pow(-zn, 3) * 0.25 : 1
+      dp.setX(i, dp.getX(i) * (1 - Math.pow(bow, 1.6) * 0.92) * stern)
+    }
+    const deck = new THREE.EdgesGeometry(deckCap)
     const flag = new THREE.BufferGeometry()
     flag.setAttribute('position', new THREE.Float32BufferAttribute([0, 3.8, 0.25, 0, 3.58, 0.25, 0, 3.69, -0.22], 3))
     flag.computeVertexNormals()
@@ -260,7 +269,7 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
       new THREE.LineBasicMaterial({ color: '#d9f9ff', transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false })
     const mainLine = new THREE.Line(mainEdge, edgeMat(0.9))
     const jibLine  = new THREE.Line(jibEdge, edgeMat(0.75))
-    return { hull, hullWire, main, jib, mainLine, jibLine, deck, flag }
+    return { hull, hullWire, main, jib, mainLine, jibLine, deck, deckCap, flag }
   }, [])
 
   const float = useRef<THREE.Group>(null)
@@ -299,6 +308,13 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
     <group position={[position[0], 0, position[2]]} scale={scale}>
       <group ref={float}>
         <group ref={hull} rotation={[0, YAW, 0]}>
+          {/* Solid inner hull + deck: hides the water behind the boat so it reads as floating */}
+          <mesh geometry={geo.hull} renderOrder={-1}>
+            <meshBasicMaterial color="#0d2a40" side={THREE.DoubleSide} />
+          </mesh>
+          <mesh geometry={geo.deckCap} renderOrder={-1}>
+            <meshBasicMaterial color="#12324a" side={THREE.DoubleSide} />
+          </mesh>
           <mesh geometry={geo.hull} material={hullMat} />
           <lineSegments geometry={geo.hullWire}>
             <lineBasicMaterial color="#5ee7ff" transparent opacity={0.18} blending={THREE.AdditiveBlending} depthWrite={false} />

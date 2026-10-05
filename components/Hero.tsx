@@ -54,21 +54,34 @@ export default function Hero() {
             ))}
           </h1>
 
-          <motion.div
-            className="mt-10 grid grid-cols-1 gap-6 border-t border-[var(--line)] pt-6 text-[15px] md:grid-cols-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 1 }}
+          <motion.p
+            className="mt-7 max-w-[42ch] text-[clamp(1rem,1.3vw,1.15rem)] leading-relaxed text-mist"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 1, ease: EASE_OUT }}
           >
-            <p className="text-mist md:col-span-3">Mathias Matejčík</p>
-            <p className="max-w-[46ch] text-mist md:col-span-5">
-              Engineer and designer from Liptovský Mikuláš, Slovakia. Licensed skipper,
-              which is how I ended up building an app for sailors.
-            </p>
-            <div className="flex gap-6 md:col-span-4 md:justify-end">
-              <a href="#work" className="link-line text-ink">See work</a>
-              <a href="#contact" className="link-line text-ink">Get in touch</a>
-            </div>
+            I&apos;m Mathias, an engineer and designer from Liptovský Mikuláš,
+            and a licensed skipper on the side.
+          </motion.p>
+
+          <motion.div
+            className="mt-9 flex flex-wrap items-center gap-3"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.95, duration: 1, ease: EASE_OUT }}
+          >
+            <a
+              href="#work"
+              className="rounded-full bg-ink px-6 py-3 text-[15px] font-medium text-void transition-shadow duration-500 hover:shadow-[0_0_30px_rgba(127,216,236,0.45)]"
+            >
+              See my work
+            </a>
+            <a
+              href="#contact"
+              className="rounded-full border border-[var(--line-bright)] px-6 py-3 text-[15px] text-ink transition-colors duration-300 hover:border-ink"
+            >
+              Get in touch
+            </a>
           </motion.div>
         </div>
       </motion.div>

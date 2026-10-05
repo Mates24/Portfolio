@@ -69,7 +69,7 @@ export default function Contact() {
     <section id="contact" className="py-24 md:py-36">
       <div className="container-wide grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-5">
-          <SectionTitle label="Contact" lines={['Have a project', 'in mind?']} />
+          <SectionTitle lines={['Have a project', 'in mind?']} />
           <FadeUp delay={0.1}>
             <p className="mt-8 max-w-[36ch] text-mist">
               Website, e-shop, app or a brand from scratch. Tell me what you are working on and I will reply within a day.
