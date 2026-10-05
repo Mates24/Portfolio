@@ -39,6 +39,7 @@ function rng(seed: number) {
 const SONAR = new THREE.Color('#5ee7ff')
 const DEEP  = new THREE.Color('#123a6b')
 const FLARE = new THREE.Color('#ff8a4c')
+const SAIL  = new THREE.Color('#bff4ff')
 
 /* ── Particle ocean ─────────────────────────────────────────── */
 function Ocean({ dense, speed, moonX }: { dense: boolean; speed: number; moonX: number }) {
@@ -130,62 +131,140 @@ function Ocean({ dense, speed, moonX }: { dense: boolean; speed: number; moonX: 
   )
 }
 
-/* ── Stars ──────────────────────────────────────────────────── */
-function Stars({ count = 900 }) {
+/* ── Night sky ───────────────────────────────────────────────
+   Real star positions (RA°, Dec°, visual magnitude) for the circumpolar
+   constellations you see looking north: Big Dipper, Little Dipper + Polaris,
+   Cassiopeia. Projected stereographically around the celestial pole. */
+const NORTH_SKY: [number, number, number, number][] = [
+  // Ursa Major — Big Dipper (Veľký voz)
+  [165.93, 61.75, 1.8, 0.3], [165.46, 56.38, 2.4, 0], [178.46, 53.69, 2.4, 0], [183.86, 57.03, 3.3, 0],
+  [193.51, 55.96, 1.8, 0], [200.98, 54.93, 2.2, 0], [206.89, 49.31, 1.9, 0],
+  // Ursa Minor — Little Dipper (Malý voz) with Polaris
+  [37.95, 89.26, 2.0, 0.15], [263.05, 86.59, 4.4, 0], [251.49, 82.04, 4.2, 0], [236.01, 77.79, 4.3, 0],
+  [222.68, 74.16, 2.1, 0.8], [230.18, 71.83, 3.0, 0], [244.38, 75.76, 5.0, 0],
+  // Cassiopeia
+  [2.29, 59.15, 2.3, 0.1], [10.13, 56.54, 2.2, 0.7], [14.18, 60.72, 2.4, 0], [21.45, 60.24, 2.7, 0], [28.6, 63.67, 3.4, 0],
+]
+
+const magToSize = (mag: number) => 12.5 * Math.pow(10, -0.17 * mag)
+
+function Stars({ mobile }: { mobile: boolean }) {
+  const mat = useRef<THREE.ShaderMaterial>(null)
+
   const geometry = useMemo(() => {
-    const pos = new Float32Array(count * 3)
+    const pos: number[] = [], size: number[] = [], phase: number[] = [], tint: number[] = []
     const random = rng(42)
-    for (let i = 0; i < count; i++) {
-      const r = 70 + random() * 20
-      const theta = random() * Math.PI * 2
-      const phi = random() * Math.PI * 0.42
-      pos[i * 3]     = r * Math.sin(phi) * Math.cos(theta)
-      pos[i * 3 + 1] = r * Math.cos(phi) * 0.6 + 2
-      pos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta) - 30
+
+    // Constellations, placed on a plane far behind the horizon
+    // Oriented like an autumn evening: Big Dipper low and level, Cassiopeia high on the other side of Polaris.
+    // Placed in the empty sky above the headline, clear of the boat.
+    const S = mobile ? 12 : 26
+    const cx = mobile ? 3 : -18, cy = mobile ? 19 : 18, z = -72
+    const rot = (45 * Math.PI) / 180
+    for (const [ra, dec, mag, warm] of NORTH_SKY) {
+      const r = 2 * Math.tan(((90 - dec) * Math.PI) / 360)
+      const a = (ra * Math.PI) / 180 + rot
+      pos.push(cx - r * Math.sin(a) * S, cy + r * Math.cos(a) * S, z)
+      size.push(magToSize(mag)); phase.push(random()); tint.push(warm)
     }
+
+    // Faint background stars: most are dim, a few are bright
+    const count = mobile ? 450 : 850
+    for (let i = 0; i < count; i++) {
+      const r = 75 + random() * 15
+      const theta = random() * Math.PI * 2
+      const phi = random() * Math.PI * 0.44
+      pos.push(r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi) * 0.55 + 1, r * Math.sin(phi) * Math.sin(theta) - 30)
+      const mag = 6.4 - 3.6 * Math.pow(random(), 5)
+      size.push(magToSize(mag)); phase.push(random()); tint.push(random() < 0.15 ? random() * 0.6 : 0)
+    }
+
     const g = new THREE.BufferGeometry()
-    g.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+    g.setAttribute('aSize', new THREE.Float32BufferAttribute(size, 1))
+    g.setAttribute('aPhase', new THREE.Float32BufferAttribute(phase, 1))
+    g.setAttribute('aTint', new THREE.Float32BufferAttribute(tint, 1))
     return g
-  }, [count])
+  }, [mobile])
+
+  const uniforms = useMemo(() => ({ uTime: { value: 0 }, uPR: { value: 1 } }), [])
+
+  useFrame((state, dt) => {
+    if (!mat.current) return
+    mat.current.uniforms.uTime.value += dt
+    mat.current.uniforms.uPR.value = state.viewport.dpr
+  })
+
   return (
-    <points geometry={geometry}>
-      <pointsMaterial size={1.4} sizeAttenuation={false} color="#bfe9ff" transparent opacity={0.55} depthWrite={false} />
+    <points geometry={geometry} frustumCulled={false}>
+      <shaderMaterial
+        ref={mat}
+        uniforms={uniforms}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        vertexShader={/* glsl */ `
+          uniform float uPR;
+          attribute float aSize; attribute float aPhase; attribute float aTint;
+          varying float vPhase; varying float vTint; varying float vY;
+          void main() {
+            vPhase = aPhase; vTint = aTint; vY = position.y;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = aSize * 1.7 * uPR;
+          }
+        `}
+        fragmentShader={/* glsl */ `
+          uniform float uTime;
+          varying float vPhase; varying float vTint; varying float vY;
+          void main() {
+            float d = length(gl_PointCoord - 0.5);
+            if (d > 0.5) discard;
+            float core = pow(smoothstep(0.5, 0.0, d), 1.8);
+            float twinkle = 0.82 + 0.18 * sin(uTime * (1.2 + vPhase * 2.0) + vPhase * 40.0);
+            vec3 col = mix(vec3(0.84, 0.91, 1.0), vec3(1.0, 0.8, 0.6), vTint);
+            float haze = smoothstep(0.5, 7.0, vY); // dimmer near the horizon
+            gl_FragColor = vec4(col, core * twinkle * haze);
+          }
+        `}
+      />
     </points>
   )
 }
 
 /* ── Hologram material ──────────────────────────────────────── */
-function useHologram(color: THREE.Color, opacity = 1) {
+function useHologram(color: THREE.Color, opacity = 1, seams = 0) {
   return useMemo(
     () =>
       new THREE.ShaderMaterial({
-        uniforms: { uColor: { value: color }, uTime: { value: 0 }, uOpacity: { value: opacity } },
+        uniforms: { uColor: { value: color }, uTime: { value: 0 }, uOpacity: { value: opacity }, uSeams: { value: seams } },
         transparent: true,
         depthWrite: false,
         side: THREE.DoubleSide,
         blending: THREE.AdditiveBlending,
         vertexShader: /* glsl */ `
-          varying vec3 vN; varying vec3 vView; varying vec3 vWorld;
+          varying vec3 vN; varying vec3 vView; varying vec3 vLocal;
           void main() {
             vec4 w = modelMatrix * vec4(position, 1.0);
-            vWorld = w.xyz;
+            vLocal = position;
             vN = normalize(mat3(modelMatrix) * normal);
             vView = normalize(cameraPosition - w.xyz);
             gl_Position = projectionMatrix * viewMatrix * w;
           }
         `,
         fragmentShader: /* glsl */ `
-          uniform vec3 uColor; uniform float uTime; uniform float uOpacity;
-          varying vec3 vN; varying vec3 vView; varying vec3 vWorld;
+          uniform vec3 uColor; uniform float uOpacity; uniform float uSeams;
+          varying vec3 vN; varying vec3 vView; varying vec3 vLocal;
           void main() {
             float fres = pow(1.0 - abs(dot(normalize(vN), normalize(vView))), 2.2);
-            float scan = step(0.82, fract(vWorld.y * 9.0 - uTime * 0.9)) * 0.35;
-            float a = (0.06 + fres * 0.85 + scan * 0.4) * uOpacity;
+            // horizontal sail seams, fixed in the sail's own space (they move with the sail, never scroll)
+            float f = fract(vLocal.y * 3.2);
+            float seam = uSeams * (1.0 - smoothstep(0.0, 0.06, min(f, 1.0 - f)));
+            float a = (0.06 + fres * 0.85 + seam * 0.22) * uOpacity;
             gl_FragColor = vec4(uColor * (0.8 + fres * 1.2), a);
           }
         `,
       }),
-    [color, opacity],
+    [color, opacity, seams],
   )
 }
 
@@ -240,7 +319,7 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
   const time  = useRef(0)
 
   const hullMat = useHologram(SONAR, 1.35)
-  const sailMat = useHologram(new THREE.Color('#bff4ff'), 0.9)
+  const sailMat = useHologram(SAIL, 0.9, 1)
   const flagMat = useHologram(FLARE, 1.2)
 
   const geo = useMemo(() => {
@@ -279,7 +358,6 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
   useFrame((_, dt) => {
     time.current += dt * speed
     const t = time.current
-    ;[hullMat, sailMat, flagMat].forEach((m) => (m.uniforms.uTime.value = t))
     if (!float.current || !hull.current) return
 
     // Sample the swell under bow, stern and both sides along the boat's own axes,
@@ -310,10 +388,10 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
         <group ref={hull} rotation={[0, YAW, 0]}>
           {/* Solid inner hull + deck: hides the water behind the boat so it reads as floating */}
           <mesh geometry={geo.hull} renderOrder={-1}>
-            <meshBasicMaterial color="#0d2a40" side={THREE.DoubleSide} />
+            <meshBasicMaterial color="#0d2a40" side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={2} polygonOffsetUnits={2} />
           </mesh>
           <mesh geometry={geo.deckCap} renderOrder={-1}>
-            <meshBasicMaterial color="#12324a" side={THREE.DoubleSide} />
+            <meshBasicMaterial color="#12324a" side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={2} polygonOffsetUnits={2} />
           </mesh>
           <mesh geometry={geo.hull} material={hullMat} />
           <lineSegments geometry={geo.hullWire}>
@@ -419,9 +497,9 @@ export default function OceanScene({ active }: { active: boolean }) {
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       camera={{ position: [0, 2.1, 9.5], fov: isMobile ? 62 : 48, near: 0.1, far: 200 }}
     >
-      <Stars count={isMobile ? 500 : 900} />
-      <Moon position={isMobile ? [-3, 13, -46] : [-13, 9.5, -46]} />
-      <Ocean dense={!isMobile} speed={speed} moonX={isMobile ? -3 : -13} />
+      <Stars mobile={isMobile} />
+      <Moon position={isMobile ? [-7, 9.5, -46] : [30, 14, -46]} />
+      <Ocean dense={!isMobile} speed={speed} moonX={isMobile ? -7 : 30} />
       <Sailboat position={isMobile ? [0.9, 0.15, -3.5] : [4.2, 0.15, -1.2]} scale={isMobile ? 0.8 : 0.82} speed={speed} />
       <Rig pointer={pointer} mobile={isMobile} />
     </Canvas>
