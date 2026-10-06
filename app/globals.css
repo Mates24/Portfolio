@@ -58,7 +58,3 @@ body {
 }
 .link-line:hover, .group:hover .link-line { background-size: 100% 1px; }
 
-/* Blinking text cursor after the logo */
-.caret { display: inline-block; animation: caret-blink 1.1s steps(1) infinite; }
-@keyframes caret-blink { 50% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .caret { animation: none; } }

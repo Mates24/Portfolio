@@ -89,8 +89,6 @@ export default function Navbar() {
           <a href="#hero" className="group flex items-center font-display text-[19px] font-semibold tracking-[-0.02em]" aria-label="Mathias.dev, back to top">
             <span className="text-ink">Mathias</span>
             <span className="text-sonar">.dev</span>
-            {/* text cursor */}
-            <span className="caret ml-[2px] h-[1.05em] w-[2px] translate-y-[1px] rounded-full bg-sonar" aria-hidden />
           </a>
 
           <div className="hidden items-center gap-9 md:flex">
