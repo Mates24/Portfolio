@@ -6,72 +6,54 @@ import { ArrowUpRight, EASE_OUT, FadeUp, SectionTitle } from './fx/primitives'
 
 type FormState = 'idle' | 'loading' | 'success' | 'error'
 
-interface FormData {
-  name:    string
-  email:   string
-  subject: string
-  message: string
-}
+// [phrase shown in the sentence, subject used in the email]
+const TOPICS: [string, string][] = [
+  ['a website', 'Website'],
+  ['an e-shop', 'E-shop'],
+  ['a mobile app', 'Mobile app'],
+  ['a brand', 'Brand & design'],
+  ['something else', 'Project'],
+]
 
-const TOPICS = ['Website', 'E-shop', 'iOS app', 'Brand & design', 'Something else']
-const MAX_MESSAGE = 2000
-
-function Field({
-  label,
-  name,
-  type = 'text',
+/* An underlined blank inside the sentence that grows with what is typed. */
+function Blank({
   value,
-  placeholder,
   onChange,
-  multiline = false,
+  placeholder,
+  type = 'text',
+  name,
+  autoComplete,
 }: {
-  label:       string
-  name:        keyof FormData
-  type?:       string
-  value:       string
+  value: string
+  onChange: (v: string) => void
   placeholder: string
-  onChange:    (name: keyof FormData, value: string) => void
-  multiline?:  boolean
+  type?: string
+  name: string
+  autoComplete: string
 }) {
-  const input =
-    'w-full bg-transparent text-[16px] text-ink outline-none placeholder:text-fog/70'
   return (
-    <label className="group block rounded-xl border border-[var(--line)] bg-[rgba(236,239,242,0.025)] px-4 pb-3 pt-2.5 transition-[border-color,box-shadow,background-color] duration-300 [&:not(:focus-within):hover]:border-[var(--line-bright)] focus-within:border-[rgba(127,216,236,0.6)] focus-within:bg-[rgba(127,216,236,0.04)] focus-within:shadow-[0_0_0_4px_rgba(127,216,236,0.08),0_0_24px_rgba(127,216,236,0.12)]">
-      <span className="flex items-center justify-between text-[13px] text-mist transition-colors group-focus-within:text-sonar">
-        {label}
-        {multiline && <span className="tabular-nums text-fog">{value.length} / {MAX_MESSAGE}</span>}
-      </span>
-      {multiline ? (
-        <textarea
-          name={name}
-          value={value}
-          required
-          rows={5}
-          maxLength={MAX_MESSAGE}
-          placeholder={placeholder}
-          onChange={(e) => onChange(name, e.target.value)}
-          className={`${input} mt-1 resize-none leading-relaxed`}
-        />
-      ) : (
-        <input
-          type={type}
-          name={name}
-          value={value}
-          required
-          placeholder={placeholder}
-          onChange={(e) => onChange(name, e.target.value)}
-          className={`${input} mt-1`}
-        />
-      )}
-    </label>
+    <input
+      type={type}
+      name={name}
+      required
+      value={value}
+      autoComplete={autoComplete}
+      placeholder={placeholder}
+      aria-label={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      style={{ width: `${Math.max(value.length, placeholder.length) + 1}ch` }}
+      className="mx-1 max-w-full border-0 border-b-2 border-dashed border-[var(--line-bright)] bg-transparent px-1 pb-0.5 text-ink outline-none transition-colors duration-300 placeholder:text-fog focus:border-solid focus:border-sonar"
+    />
   )
 }
 
 export default function Contact() {
-  const [form, setForm] = useState<FormData>({ name: '', email: '', subject: '', message: '' })
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [topic, setTopic] = useState(0)
+  const [message, setMessage] = useState('')
   const [state, setState] = useState<FormState>('idle')
-
-  const handleChange = (name: keyof FormData, value: string) => setForm((prev) => ({ ...prev, [name]: value }))
+  const [sentTo, setSentTo] = useState({ name: '', email: '' })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,14 +62,12 @@ export default function Contact() {
       const res = await fetch('/api/contact', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          ...form,
-          subject: form.subject ? `${form.subject} inquiry from ${form.name}` : `New inquiry from ${form.name}`,
-        }),
+        body:    JSON.stringify({ name, email, message, subject: `${TOPICS[topic][1]} inquiry from ${name}` }),
       })
       if (!res.ok) throw new Error('Failed')
+      setSentTo({ name, email })
       setState('success')
-      setForm({ name: '', email: '', subject: '', message: '' })
+      setName(''); setEmail(''); setMessage(''); setTopic(0)
     } catch {
       setState('error')
     }
@@ -95,18 +75,15 @@ export default function Contact() {
 
   return (
     <section id="contact" className="py-24 md:py-36">
-      <div className="container-wide grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16">
-        <div className="lg:col-span-5">
-          <SectionTitle lines={['Have a project', 'in mind?']} />
-          <FadeUp delay={0.1}>
-            <p className="mt-8 max-w-[36ch] text-mist">
-              Website, e-shop, app or a brand from scratch. Tell me a bit about it, or email me directly.
-            </p>
-            <a href={`mailto:${EMAIL}`} className="group mt-8 inline-flex items-center gap-2 text-[clamp(1.05rem,1.6vw,1.3rem)] text-ink">
+      <div className="container-wide">
+        <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-12 lg:gap-16">
+          <SectionTitle lines={['Have a project', 'in mind?']} className="lg:col-span-7" />
+          <FadeUp delay={0.1} className="lg:col-span-5">
+            <a href={`mailto:${EMAIL}`} className="group inline-flex items-center gap-2 text-[clamp(1.05rem,1.6vw,1.3rem)] text-ink">
               <span className="link-line">{EMAIL}</span>
               <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </a>
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[15px] text-mist">
+            <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[15px] text-mist">
               {SOCIALS.map((s) => (
                 <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="link-line transition-colors hover:text-ink">
                   {s.label}
@@ -116,101 +93,100 @@ export default function Contact() {
           </FadeUp>
         </div>
 
-        <FadeUp delay={0.15} className="lg:col-span-7">
-          <div className="relative overflow-hidden rounded-2xl border border-[var(--line)] bg-abyss p-7 md:p-10">
-            {/* faint light along the top edge of the panel */}
-            <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-sonar to-transparent opacity-60" />
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(127,216,236,0.08),transparent)]" />
+        <FadeUp delay={0.15} className="mt-14 md:mt-20">
+          <div className="relative overflow-hidden rounded-2xl border border-[var(--line)] bg-abyss px-6 py-9 md:px-14 md:py-14">
+            <div className="pointer-events-none absolute inset-x-16 top-0 h-px bg-gradient-to-r from-transparent via-sonar to-transparent opacity-50" />
+
             <AnimatePresence mode="wait">
               {state === 'success' ? (
                 <motion.div
                   key="ok"
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5, ease: EASE_OUT }}
-                  className="relative py-10"
+                  transition={{ duration: 0.6, ease: EASE_OUT }}
+                  className="font-display text-[clamp(1.5rem,2.8vw,2.4rem)] font-medium leading-[1.45] tracking-[-0.02em] text-mist"
                 >
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-sonar text-sonar shadow-[0_0_24px_rgba(127,216,236,0.3)]">
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5L20 7" /></svg>
-                  </div>
-                  <p className="font-display text-2xl font-semibold text-ink">Thanks, message sent.</p>
-                  <p className="mt-2 text-mist">I&apos;ll get back to you soon.</p>
-                  <button onClick={() => setState('idle')} className="link-line mt-6 text-[14px] text-mist hover:text-ink">
-                    Send another one
+                  <p>
+                    Thanks, <span className="text-ink">{sentTo.name}</span>. Your message is on its way and
+                    I&apos;ll reply to <span className="text-ink">{sentTo.email}</span> soon.
+                  </p>
+                  <button onClick={() => setState('idle')} className="link-line mt-8 font-body text-[15px] font-normal tracking-normal text-mist hover:text-ink">
+                    Write another message
                   </button>
                 </motion.div>
               ) : (
-                <motion.form key="form" onSubmit={handleSubmit} exit={{ opacity: 0 }} className="relative flex flex-col gap-5">
-                  <fieldset>
-                    <legend className="mb-3 text-[13px] text-mist">What are you working on?</legend>
-                    <div className="flex flex-wrap gap-2">
-                      {TOPICS.map((t) => {
-                        const on = form.subject === t
-                        return (
-                          <button
-                            key={t}
-                            type="button"
-                            aria-pressed={on}
-                            onClick={() => handleChange('subject', on ? '' : t)}
-                            className={`rounded-full border px-4 py-2 text-[14px] transition-all duration-300 active:scale-[0.97] ${
-                              on
-                                ? 'border-sonar bg-[rgba(127,216,236,0.12)] text-ink shadow-[0_0_18px_rgba(127,216,236,0.25)]'
-                                : 'border-[var(--line)] text-mist hover:border-[var(--line-bright)] hover:text-ink'
-                            }`}
-                          >
-                            {t}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </fieldset>
+                <motion.form key="form" onSubmit={handleSubmit} exit={{ opacity: 0 }} className="relative">
+                  <p className="font-display text-[clamp(1.5rem,2.8vw,2.4rem)] font-medium leading-[1.7] tracking-[-0.02em] text-mist">
+                    Hi Mathias, I&apos;m
+                    <Blank name="name" autoComplete="name" placeholder="your name" value={name} onChange={setName} />
+                    and I&apos;m looking for{' '}
+                    {TOPICS.map(([phrase], i) => (
+                      <span key={phrase}>
+                        <button
+                          type="button"
+                          aria-pressed={topic === i}
+                          onClick={() => setTopic(i)}
+                          className={`relative rounded-md px-1 transition-colors duration-300 ${
+                            topic === i ? 'text-ink' : 'text-fog hover:text-mist'
+                          }`}
+                        >
+                          {phrase}
+                          {topic === i && (
+                            <motion.span
+                              layoutId="topic-underline"
+                              className="absolute inset-x-1 -bottom-0.5 h-[2px] rounded-full bg-sonar shadow-[0_0_10px_rgba(127,216,236,0.7)]"
+                              transition={{ type: 'spring', stiffness: 400, damping: 34 }}
+                            />
+                          )}
+                        </button>
+                        {i < TOPICS.length - 2 ? ', ' : i === TOPICS.length - 2 ? ' or ' : ''}
+                      </span>
+                    ))}
+                    . You can reach me at
+                    <Blank name="email" type="email" autoComplete="email" placeholder="your email" value={email} onChange={setEmail} />.
+                  </p>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Name" name="name" placeholder="Jana Nováková" value={form.name} onChange={handleChange} />
-                    <Field label="Email" name="email" type="email" placeholder="jana@company.sk" value={form.email} onChange={handleChange} />
-                  </div>
-                  <Field
-                    label="Message"
-                    name="message"
-                    placeholder="A few lines about the project, timeline and anything I should know."
-                    value={form.message}
-                    onChange={handleChange}
-                    multiline
-                  />
+                  <label className="mt-10 block">
+                    <span className="text-[15px] text-mist">Tell me more about it</span>
+                    <textarea
+                      name="message"
+                      required
+                      rows={4}
+                      maxLength={2000}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Goals, timeline, budget, links. Whatever helps."
+                      className="mt-3 w-full resize-none rounded-xl border border-[var(--line)] bg-[rgba(236,239,242,0.02)] px-5 py-4 text-[17px] leading-relaxed text-ink outline-none transition-[border-color,box-shadow] duration-300 placeholder:text-fog focus:border-[rgba(127,216,236,0.6)] focus:shadow-[0_0_0_4px_rgba(127,216,236,0.08),0_0_24px_rgba(127,216,236,0.1)]"
+                    />
+                  </label>
 
                   {state === 'error' && (
-                    <p className="rounded-xl border border-[rgba(229,72,77,0.35)] bg-[rgba(229,72,77,0.08)] px-4 py-3 text-[14px] text-red-300">
-                      Something went wrong. Please email me directly at {EMAIL}.
+                    <p className="mt-5 text-[15px] text-red-300">
+                      That didn&apos;t go through. Please try again or write to {EMAIL}.
                     </p>
                   )}
 
-                  <div className="mt-2 flex flex-col-reverse items-start justify-between gap-4 sm:flex-row sm:items-center">
-                    <p className="flex items-center gap-2 text-[14px] text-fog">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#30a46c] shadow-[0_0_8px_rgba(48,164,108,0.8)]" />
-                      Usually replies within a day
-                    </p>
+                  <div className="mt-8 flex flex-col-reverse items-start justify-between gap-5 sm:flex-row sm:items-center">
+                    <p className="text-[15px] text-fog">I usually reply within a day.</p>
                     <button
                       type="submit"
                       disabled={state === 'loading'}
-                      className="group inline-flex items-center gap-2.5 rounded-full bg-ink px-6 py-3.5 text-[15px] font-medium text-void transition-[box-shadow,transform] duration-500 hover:shadow-[0_0_30px_rgba(127,216,236,0.45)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="group inline-flex items-center gap-3 rounded-full bg-ink py-2 pl-6 pr-2 text-[16px] font-medium text-void transition-[box-shadow,transform] duration-500 hover:shadow-[0_0_34px_rgba(127,216,236,0.45)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {state === 'loading' ? (
-                        <>
+                      {state === 'loading' ? 'Sending' : 'Send message'}
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-void text-ink transition-transform duration-500 group-hover:rotate-[-45deg]">
+                        {state === 'loading' ? (
                           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
                             <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2.5" />
                             <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                           </svg>
-                          Sending
-                        </>
-                      ) : (
-                        <>
-                          Send message
-                          <svg className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        ) : (
+                          <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                             <path d="M3 8h10M9 4l4 4-4 4" />
                           </svg>
-                        </>
-                      )}
+                        )}
+                      </span>
                     </button>
                   </div>
                 </motion.form>

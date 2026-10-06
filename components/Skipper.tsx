@@ -30,9 +30,9 @@ const SOUNDINGS: [number, number, number][] = [
 ]
 
 const WAYPOINTS = [
-  { t: 0,    x: 330, y: 735, label: 'Marina',    dx: 16,  dy: 22 },
-  { t: 0.56, x: 690, y: 480, label: 'Channel',   dx: -78, dy: 4 },
-  { t: 1,    x: 850, y: 255, label: 'Anchorage', dx: 18,  dy: 4 },
+  { t: 0,    x: 330, y: 735 },
+  { t: 0.56, x: 690, y: 480 },
+  { t: 1,    x: 850, y: 255 },
 ]
 
 const CHAPTERS = [
@@ -85,7 +85,6 @@ function Waypoint({ wp, routeT }: { wp: (typeof WAYPOINTS)[number]; routeT: Moti
   return (
     <motion.g style={{ opacity }}>
       <circle cx={wp.x} cy={wp.y} r="6" fill="#03070d" stroke="#eceff2" strokeWidth="1.5" />
-      <text x={wp.x + wp.dx} y={wp.y + wp.dy} fill="#eceff2" fontSize="15" fontWeight="500">{wp.label}</text>
     </motion.g>
   )
 }
@@ -192,12 +191,6 @@ function Chart({ progress }: { progress: MotionValue<number> }) {
           <path d="M770 380 L777 392 L763 392 Z" fill="#30a46c" opacity="0.85" />
         </g>
 
-        {/* anchorage symbol */}
-        <g transform="translate(888 222)" stroke="rgba(236,239,242,0.75)" strokeWidth="1.6" fill="none" strokeLinecap="round">
-          <circle cx="0" cy="-9" r="3" />
-          <path d="M0 -6 V9 M-6 -1 H6 M-9 3 C-8 9 -4 11 0 11 C4 11 8 9 9 3" />
-        </g>
-
         {/* planned track + sailed track */}
         <path d={ROUTE} fill="none" stroke="rgba(236,239,242,0.28)" strokeWidth="1.5" strokeDasharray="6 7" />
         <motion.path
@@ -210,7 +203,7 @@ function Chart({ progress }: { progress: MotionValue<number> }) {
           style={{ pathLength: routeT, filter: 'drop-shadow(0 0 6px rgba(255,138,76,0.7))' }}
         />
 
-        {WAYPOINTS.map((w) => <Waypoint key={w.label} wp={w} routeT={routeT} />)}
+        {WAYPOINTS.map((w) => <Waypoint key={w.t} wp={w} routeT={routeT} />)}
 
         <g ref={boatRef} transform="translate(330 735)">
           <circle r="16" fill="rgba(255,138,76,0.18)" />

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: '%s | Mathias Matejčík',
   },
   description:
-    'Software engineer and designer building websites, iOS apps and brands, from first sketch to App Store. Licensed skipper and maker of LogBook. Based in Liptovský Mikuláš, Slovakia.',
+    'Software engineer and designer building websites, mobile apps for iOS and Android, and brands, from first sketch to launch. Licensed skipper and maker of LogBook. Based in Liptovský Mikuláš, Slovakia.',
   keywords: [
     'software engineer',
     'UI designer',
@@ -47,6 +47,8 @@ export const metadata: Metadata = {
     'e-shop na mieru',
     'React Native',
     'iOS app developer',
+    'Android app developer',
+    'mobile app developer',
     'LogBook yacht log',
     'Postele Liptov',
     'skipper',
@@ -61,7 +63,7 @@ export const metadata: Metadata = {
     siteName: 'Mathias Matejčík',
     title: 'Mathias Matejčík — Engineer, Designer & Skipper',
     description:
-      'Software engineer and designer building websites, iOS apps and brands, from first sketch to App Store. Licensed skipper and maker of LogBook. Based in Liptovský Mikuláš, Slovakia.',
+      'Software engineer and designer building websites, mobile apps for iOS and Android, and brands, from first sketch to launch. Licensed skipper and maker of LogBook. Based in Liptovský Mikuláš, Slovakia.',
     images: [
       {
         url: '/og-image.png',
@@ -76,7 +78,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Mathias Matejčík — Engineer, Designer & Skipper',
     description:
-      'Websites, iOS apps and brands, from first sketch to App Store. Licensed skipper and maker of LogBook.',
+      'Websites, mobile apps and brands, from first sketch to launch. Licensed skipper and maker of LogBook.',
     images: ['/og-image.png'],
   },
 

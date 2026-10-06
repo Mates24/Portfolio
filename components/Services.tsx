@@ -8,8 +8,8 @@ const SERVICES = [
     stack: 'Next.js, PostgreSQL, custom CMS',
   },
   {
-    title: 'iOS apps',
-    desc:  'From the first idea and UX through subscriptions to release on the App Store.',
+    title: 'Mobile apps',
+    desc:  'Apps for iOS and Android from one codebase, from the first idea and UX through subscriptions to release on the App Store and Google Play.',
     stack: 'React Native, Expo, RevenueCat',
   },
   {
