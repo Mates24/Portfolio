@@ -23,10 +23,18 @@ const DEPTH_BANDS: [number, string][] = [
   [44,  '#112338'],
 ]
 
+/* Channel gates: a red and a green buoy facing each other across the fairway,
+   26 units either side of ROUTE at t = 0.45 and t = 0.70. Leaving the marina we
+   sail against the direction of buoyage (IALA A), so red is to starboard. */
+const GATES: { red: [number, number]; green: [number, number] }[] = [
+  { red: [594, 552], green: [570, 506] },
+  { red: [763, 467], green: [728, 428] },
+]
+
 const SOUNDINGS: [number, number, number][] = [
-  [250, 300, 34], [330, 220, 41], [560, 180, 38], [700, 200, 29], [200, 470, 18], [320, 600, 21],
+  [560, 180, 38], [700, 200, 29], [200, 470, 18], [320, 600, 21],
   [420, 540, 26], [540, 520, 31], [620, 680, 24], [720, 760, 19], [840, 760, 27], [900, 400, 33],
-  [760, 300, 22], [400, 180, 45], [470, 760, 15], [600, 840, 12], [860, 860, 23], [250, 380, 27],
+  [760, 300, 22], [470, 760, 15], [600, 840, 12], [860, 860, 23],
 ]
 
 const WAYPOINTS = [
@@ -172,7 +180,6 @@ function Chart({ progress }: { progress: MotionValue<number> }) {
           <text key={`${x}-${y}`} x={x} y={y} fill="rgba(140,151,165,0.6)" fontSize="13" fontStyle="italic" textAnchor="middle">{d}</text>
         ))}
 
-        <CompassRose x={230} y={215} r={95} />
 
         {/* lighthouse on the island with a slowly flashing light sector */}
         <g transform="translate(792 494)">
@@ -183,13 +190,13 @@ function Chart({ progress }: { progress: MotionValue<number> }) {
           <text x="10" y="18" fill="rgba(236,239,242,0.7)" fontSize="12" fontStyle="italic">Fl 4s</text>
         </g>
 
-        {/* channel buoys: red to port, green to starboard */}
-        <g>
-          <rect x="648" y="508" width="10" height="10" fill="#e5484d" />
-          <path d="M738 440 L745 452 L731 452 Z" fill="#30a46c" />
-          <rect x="598" y="560" width="10" height="10" fill="#e5484d" opacity="0.85" />
-          <path d="M770 380 L777 392 L763 392 Z" fill="#30a46c" opacity="0.85" />
-        </g>
+        {/* channel buoy gates */}
+        {GATES.map(({ red, green }, i) => (
+          <g key={i}>
+            <rect x={red[0] - 5} y={red[1] - 5} width="10" height="10" fill="#e5484d" />
+            <path d={`M${green[0]} ${green[1] - 7} L${green[0] + 7} ${green[1] + 5} L${green[0] - 7} ${green[1] + 5} Z`} fill="#30a46c" />
+          </g>
+        ))}
 
         {/* planned track + sailed track */}
         <path d={ROUTE} fill="none" stroke="rgba(236,239,242,0.28)" strokeWidth="1.5" strokeDasharray="6 7" />
@@ -209,6 +216,12 @@ function Chart({ progress }: { progress: MotionValue<number> }) {
           <circle r="16" fill="rgba(255,138,76,0.18)" />
           <path d="M0 -13 L7 9 L0 5 L-7 9 Z" fill="#ff8a4c" style={{ filter: 'drop-shadow(0 0 5px rgba(255,138,76,0.9))' }} />
         </g>
+      </svg>
+
+      {/* Compass rose sits outside the cropped chart so its distance from the top and
+          left edges is identical on every panel size. viewBox is the rose's exact bounds. */}
+      <svg viewBox="-97 -119 194 216" className="pointer-events-none absolute left-8 top-8 h-auto w-[clamp(92px,20%,150px)]" aria-hidden>
+        <CompassRose x={0} y={0} r={95} />
       </svg>
 
       {/* graduated chart border */}
