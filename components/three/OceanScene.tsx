@@ -358,9 +358,28 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
       new THREE.Vector3(0, 0.5, MAST_Z), new THREE.Vector3(0, 3.6, MAST_Z), new THREE.Vector3(0, 0.55, -1.75),
       -0.32, aroundMast(MAIN_TRIM),
     )
-    const jibTack = new THREE.Vector3(0, 0.3, 2.05)
-    const jibHead = new THREE.Vector3(0, 3.25, MAST_Z + 0.04)
-    const jib = makeSail(jibTack, jibHead, new THREE.Vector3(0, 0.5, 0.55), -0.22, aroundLine(jibTack, jibHead, JIB_TRIM))
+    // The jib hangs on the forestay (stemhead → mast), so its luff and tack sit on the rig.
+    const stem = new THREE.Vector3(0, 0.03, 1.98)
+    const hounds = new THREE.Vector3(0, 3.45, MAST_Z + 0.02)
+    const onForestay = (t: number) => stem.clone().lerp(hounds, t)
+    const jibTack = onForestay(0.04)
+    const jibHead = onForestay(0.93)
+    const jibTrim = aroundLine(jibTack, jibHead, JIB_TRIM)
+    const jib = makeSail(jibTack, jibHead, new THREE.Vector3(0, 0.32, 0.62), -0.22, jibTrim)
+
+    // Standing and running rigging, as line segment pairs
+    const jibClew = jibTrim(new THREE.Vector3(0, 0.32, 0.62))
+    const boomEnd = aroundMast(MAIN_TRIM)(new THREE.Vector3(0, 0.52, -1.75))
+    const masthead = new THREE.Vector3(0, 3.8, MAST_Z)
+    const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z)
+    const rigging = new THREE.BufferGeometry().setFromPoints([
+      stem, hounds,                                   // forestay
+      masthead, V(0, 0.03, -1.95),                    // backstay
+      V(0, 3.3, MAST_Z), V(0.56, 0.03, 0.12),         // starboard shroud
+      V(0, 3.3, MAST_Z), V(-0.56, 0.03, 0.12),        // port shroud
+      jibClew, V(-0.5, 0.03, 0.05),                   // jib sheet to the deck
+      boomEnd, V(-0.12, 0.03, -1.55),                 // mainsheet to the cockpit
+    ])
     const deckCap = new THREE.CircleGeometry(1, 40).scale(0.61, 2.08, 1).rotateX(-Math.PI / 2)
     // match the hull's pinched bow so the cap doesn't poke out past the outline
     const dp = deckCap.attributes.position as THREE.BufferAttribute
@@ -375,7 +394,11 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
       new THREE.LineBasicMaterial({ color: '#d9f9ff', transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false })
     const mainLine = new THREE.Line(main.outline, edgeMat(0.9))
     const jibLine  = new THREE.Line(jib.outline, edgeMat(0.75))
-    return { hull, hullWire, main: main.surface, jib: jib.surface, mainLine, jibLine, deck, deckCap }
+    const rig = new THREE.LineSegments(
+      rigging,
+      new THREE.LineBasicMaterial({ color: '#a6ecf8', transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }),
+    )
+    return { hull, hullWire, main: main.surface, jib: jib.surface, mainLine, jibLine, deck, deckCap, rig }
   }, [])
 
   const float = useRef<THREE.Group>(null)
@@ -441,6 +464,7 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
           <primitive object={geo.mainLine} />
           <mesh geometry={geo.jib} material={sailMat} />
           <primitive object={geo.jibLine} />
+          <primitive object={geo.rig} />
         </group>
         {/* glow halo on the water */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -FREEBOARD - 0.02, 0]}>
