@@ -5,7 +5,7 @@ import { ArrowUpRight, useScrollProgress } from './fx/primitives'
 
 /* Chart is drawn on a 1000×1000 square. Everything that matters stays inside
    x/y 150–850 so it survives cropping at any panel aspect ratio. */
-const ROUTE = 'M 330 735 C 400 700 460 660 500 600 S 600 520 690 480 S 760 420 780 360 S 808 262 835 212'
+const ROUTE = 'M 330 735 C 400 700 460 660 500 600 S 600 520 690 480 S 760 420 780 360 S 835 225 879 149'
 
 const MAINLAND = 'M -60 1060 L -60 380 C 40 400 90 470 120 560 C 150 650 230 700 285 745 C 330 785 360 860 470 900 C 560 925 640 985 700 1060 Z'
 const LAND = [
@@ -32,7 +32,7 @@ const SOUNDINGS: [number, number, number][] = [
 const WAYPOINTS = [
   { t: 0,    x: 330, y: 735 },
   { t: 0.56, x: 690, y: 480 },
-  { t: 1,    x: 835, y: 212 },
+  { t: 1,    x: 879, y: 149 },
 ]
 
 const CHAPTERS = [
