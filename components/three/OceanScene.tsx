@@ -38,7 +38,6 @@ function rng(seed: number) {
 
 const SONAR = new THREE.Color('#5ee7ff')
 const DEEP  = new THREE.Color('#123a6b')
-const FLARE = new THREE.Color('#ff8a4c')
 const SAIL  = new THREE.Color('#bff4ff')
 
 /* ── Particle ocean ─────────────────────────────────────────── */
@@ -268,10 +267,19 @@ function useHologram(color: THREE.Color, opacity = 1, seams = 0) {
   )
 }
 
-/* Sail as a subdivided triangle with a belly (luff = tack→head, leech = clew→head). */
-function makeSail(tack: THREE.Vector3, head: THREE.Vector3, clew: THREE.Vector3, belly: number, R = 14, C = 10) {
-  const pos: number[] = []
-  const idx: number[] = []
+/* Sail as a subdivided triangle with a belly (luff = tack→head, leech = clew→head).
+   `trim` swings the finished sail (e.g. around the mast); the outline is traced from
+   the same grid so the glowing edge always sits exactly on the sail. */
+function makeSail(
+  tack: THREE.Vector3,
+  head: THREE.Vector3,
+  clew: THREE.Vector3,
+  belly: number,
+  trim: (p: THREE.Vector3) => THREE.Vector3 = (p) => p,
+  R = 14,
+  C = 10,
+) {
+  const grid: THREE.Vector3[] = []
   for (let r = 0; r <= R; r++) {
     const v = r / R
     const L = tack.clone().lerp(head, v)
@@ -280,20 +288,41 @@ function makeSail(tack: THREE.Vector3, head: THREE.Vector3, clew: THREE.Vector3,
       const u = c / C
       const p = L.clone().lerp(E, u)
       p.x += belly * (1 - v) * Math.sin(Math.PI * u)
-      pos.push(p.x, p.y, p.z)
+      grid.push(trim(p))
     }
   }
+  const idx: number[] = []
   for (let r = 0; r < R; r++) {
     for (let c = 0; c < C; c++) {
       const a = r * (C + 1) + c, b = a + C + 1
       idx.push(a, b, a + 1, b, b + 1, a + 1)
     }
   }
-  const g = new THREE.BufferGeometry()
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  const g = new THREE.BufferGeometry().setFromPoints(grid)
   g.setIndex(idx)
   g.computeVertexNormals()
-  return g
+
+  const at = (r: number, c: number) => grid[r * (C + 1) + c]
+  const edge: THREE.Vector3[] = []
+  for (let r = 0; r <= R; r++) edge.push(at(r, 0))       // luff, up
+  for (let r = R; r >= 0; r--) edge.push(at(r, C))       // leech, down
+  for (let c = C; c >= 0; c--) edge.push(at(0, c))       // foot, back to tack
+  return { surface: g, outline: new THREE.BufferGeometry().setFromPoints(edge) }
+}
+
+const MAST_Z = 0.25
+const MAIN_TRIM = 0.22 // boom angle off the centreline
+const JIB_TRIM = 0.18
+
+/** Rotate around the mast (vertical axis through z = MAST_Z). */
+const aroundMast = (angle: number) => {
+  const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle)
+  return (p: THREE.Vector3) => { p.z -= MAST_Z; p.applyQuaternion(q); p.z += MAST_Z; return p }
+}
+/** Rotate around the line a→b (used for the jib, which pivots on the forestay). */
+const aroundLine = (a: THREE.Vector3, b: THREE.Vector3, angle: number) => {
+  const q = new THREE.Quaternion().setFromAxisAngle(b.clone().sub(a).normalize(), angle)
+  return (p: THREE.Vector3) => p.sub(a).applyQuaternion(q).add(a)
 }
 
 function makeHull(widthSeg: number, heightSeg: number) {
@@ -320,17 +349,18 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
 
   const hullMat = useHologram(SONAR, 1.35)
   const sailMat = useHologram(SAIL, 0.9, 1)
-  const flagMat = useHologram(FLARE, 1.2)
 
   const geo = useMemo(() => {
     const hull = makeHull(40, 14)
     const hullWire = new THREE.WireframeGeometry(makeHull(16, 5))
-    const main = makeSail(new THREE.Vector3(0, 0.5, 0.25), new THREE.Vector3(0, 3.6, 0.25), new THREE.Vector3(0, 0.55, -1.75), 0.32)
-    const jib  = makeSail(new THREE.Vector3(0, 0.3, 2.05), new THREE.Vector3(0, 3.25, 0.32), new THREE.Vector3(0, 0.5, 0.55), 0.22)
-    const outline = (pts: number[][]) =>
-      new THREE.BufferGeometry().setFromPoints(pts.map((v) => new THREE.Vector3(...(v as [number, number, number]))))
-    const mainEdge = outline([[0.05, 0.5, 0.25], [0.05, 3.6, 0.25], [0.12, 0.55, -1.75], [0.05, 0.5, 0.25]])
-    const jibEdge  = outline([[0.03, 0.3, 2.05], [0.03, 3.25, 0.32], [0.08, 0.5, 0.55], [0.03, 0.3, 2.05]])
+    // Both sails bulge to leeward (−x), the same side the boom swings to.
+    const main = makeSail(
+      new THREE.Vector3(0, 0.5, MAST_Z), new THREE.Vector3(0, 3.6, MAST_Z), new THREE.Vector3(0, 0.55, -1.75),
+      -0.32, aroundMast(MAIN_TRIM),
+    )
+    const jibTack = new THREE.Vector3(0, 0.3, 2.05)
+    const jibHead = new THREE.Vector3(0, 3.25, MAST_Z + 0.04)
+    const jib = makeSail(jibTack, jibHead, new THREE.Vector3(0, 0.5, 0.55), -0.22, aroundLine(jibTack, jibHead, JIB_TRIM))
     const deckCap = new THREE.CircleGeometry(1, 40).scale(0.61, 2.08, 1).rotateX(-Math.PI / 2)
     // match the hull's pinched bow so the cap doesn't poke out past the outline
     const dp = deckCap.attributes.position as THREE.BufferAttribute
@@ -341,14 +371,11 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
       dp.setX(i, dp.getX(i) * (1 - Math.pow(bow, 1.6) * 0.92) * stern)
     }
     const deck = new THREE.EdgesGeometry(deckCap)
-    const flag = new THREE.BufferGeometry()
-    flag.setAttribute('position', new THREE.Float32BufferAttribute([0, 3.8, 0.25, 0, 3.58, 0.25, 0, 3.69, -0.22], 3))
-    flag.computeVertexNormals()
     const edgeMat = (opacity: number) =>
       new THREE.LineBasicMaterial({ color: '#d9f9ff', transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false })
-    const mainLine = new THREE.Line(mainEdge, edgeMat(0.9))
-    const jibLine  = new THREE.Line(jibEdge, edgeMat(0.75))
-    return { hull, hullWire, main, jib, mainLine, jibLine, deck, deckCap, flag }
+    const mainLine = new THREE.Line(main.outline, edgeMat(0.9))
+    const jibLine  = new THREE.Line(jib.outline, edgeMat(0.75))
+    return { hull, hullWire, main: main.surface, jib: jib.surface, mainLine, jibLine, deck, deckCap }
   }, [])
 
   const float = useRef<THREE.Group>(null)
@@ -401,22 +428,19 @@ function Sailboat({ position, speed, scale = 1 }: { position: [number, number, n
             <lineBasicMaterial color="#5ee7ff" transparent opacity={0.8} blending={THREE.AdditiveBlending} depthWrite={false} />
           </lineSegments>
           {/* mast + boom */}
-          <mesh position={[0, 1.9, 0.25]} material={hullMat}>
+          <mesh position={[0, 1.9, MAST_Z]} material={hullMat}>
             <cylinderGeometry args={[0.022, 0.03, 3.8, 8]} />
           </mesh>
-          <mesh position={[0, 0.52, -0.75]} rotation={[Math.PI / 2, 0, 0]} material={hullMat}>
-            <cylinderGeometry args={[0.02, 0.02, 2.0, 6]} />
-          </mesh>
-          <group rotation={[0, 0.22, 0]}>
-            <mesh geometry={geo.main} material={sailMat} />
-            <primitive object={geo.mainLine} />
+          {/* boom: pivots at the mast together with the mainsail */}
+          <group position={[0, 0.52, MAST_Z]} rotation={[0, MAIN_TRIM, 0]}>
+            <mesh position={[0, 0, -1.0]} rotation={[Math.PI / 2, 0, 0]} material={hullMat}>
+              <cylinderGeometry args={[0.02, 0.02, 2.0, 6]} />
+            </mesh>
           </group>
-          <group rotation={[0, 0.14, 0]}>
-            <mesh geometry={geo.jib} material={sailMat} />
-            <primitive object={geo.jibLine} />
-          </group>
-          <mesh geometry={geo.flag} material={flagMat} />
-          <pointLight position={[0, 3.9, 0.25]} color="#ff8a4c" intensity={2} distance={3} />
+          <mesh geometry={geo.main} material={sailMat} />
+          <primitive object={geo.mainLine} />
+          <mesh geometry={geo.jib} material={sailMat} />
+          <primitive object={geo.jibLine} />
         </group>
         {/* glow halo on the water */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -FREEBOARD - 0.02, 0]}>
